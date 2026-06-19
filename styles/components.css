@@ -1,0 +1,114 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — COMPONENTS
+   Button · Card · Badge · SpecRow, rebuilt as plain CSS classes
+   from the design-system component definitions. These replace
+   the <x-import …Button/Card/Badge/SpecRow> elements 1:1.
+   ============================================================ */
+
+/* ---- Button — raised by default (pops out), seats in on press ---- */
+.ge-btn{
+  --_pad-y:12px; --_pad-x:18px; --_fs:14px;
+  font-family:var(--font-sans);font-weight:600;font-size:var(--_fs);
+  letter-spacing:-0.01em;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:var(--_pad-y) var(--_pad-x);
+  border:1.5px solid transparent;border-radius:var(--radius-sm);
+  cursor:pointer;user-select:none;white-space:nowrap;
+  text-decoration:none;
+  transition:background var(--dur-fast) var(--ease-mechanical),
+             box-shadow var(--dur-base) var(--ease-pop),
+             transform var(--dur-base) var(--ease-pop),
+             color var(--dur-fast) var(--ease-mechanical);
+}
+.ge-btn:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.ge-btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none !important;transform:none !important;}
+.ge-btn .ge-btn__ico{display:inline-flex;width:1.15em;height:1.15em;}
+.ge-btn .ge-btn__ico svg{width:100%;height:100%;}
+
+/* sizes */
+.ge-btn--sm{--_pad-y:8px;--_pad-x:13px;--_fs:13px;}
+.ge-btn--lg{--_pad-y:15px;--_pad-x:24px;--_fs:16px;}
+
+/* primary — voltage */
+.ge-btn--primary{background:var(--volt-500);color:#fff;box-shadow:var(--elev-2),var(--glow-volt-sm);}
+.ge-btn--primary:hover{background:var(--volt-600);box-shadow:var(--elev-3),var(--glow-volt-sm);transform:translateY(-1px);}
+.ge-btn--primary:active{background:var(--volt-700);box-shadow:var(--inset-1);transform:translateY(1px);}
+
+/* secondary — machined light */
+.ge-btn--secondary{background:var(--white);color:var(--ink-800);box-shadow:var(--elev-2);}
+.ge-btn--secondary:hover{box-shadow:var(--elev-3);transform:translateY(-1px);}
+.ge-btn--secondary:active{box-shadow:var(--inset-1);transform:translateY(1px);color:var(--ink-600);}
+
+/* dark — inverse */
+.ge-btn--dark{background:var(--ink-900);color:var(--ink-25);box-shadow:var(--elev-dark-1);}
+.ge-btn--dark:hover{background:var(--ink-800);transform:translateY(-1px);}
+.ge-btn--dark:active{box-shadow:var(--inset-dark-1);transform:translateY(1px);}
+
+/* ghost — quiet */
+.ge-btn--ghost{background:transparent;color:var(--ink-600);}
+.ge-btn--ghost:hover{background:var(--surface-sunken);color:var(--ink-900);}
+.ge-btn--ghost:active{box-shadow:var(--inset-1);}
+
+/* ---- Card — the machined-part surface ---- */
+.ge-card{
+  background:var(--surface-card);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--elev-2);
+  border-top:1.5px solid rgba(255,255,255,.85);
+  color:var(--text-body);
+  overflow:hidden;
+  transition:box-shadow var(--dur-base) var(--ease-pop),
+             transform var(--dur-base) var(--ease-pop);
+}
+.ge-card--pad{padding:var(--card-pad);}
+.ge-card--interactive{cursor:pointer;}
+.ge-card--interactive:hover{box-shadow:var(--elev-4);transform:translateY(-3px);}
+.ge-card--interactive:active{box-shadow:var(--elev-2);transform:translateY(-1px);}
+.ge-card--inset{box-shadow:var(--inset-1);background:var(--surface-sunken);border-top:none;}
+.ge-card--dark{
+  background:var(--ink-900);color:var(--ink-100);
+  box-shadow:var(--elev-dark-2);
+  border-top:1.5px solid rgba(255,255,255,.10);
+}
+.ge-card--dark.ge-card--interactive:hover{box-shadow:var(--elev-dark-2),0 40px 80px rgba(0,0,0,.4);}
+
+/* ---- Badge — status indicator, mono micro-label ---- */
+.ge-badge{
+  font-family:var(--font-mono);font-weight:500;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:var(--radius-pill);
+  background:var(--white);color:var(--ink-600);box-shadow:var(--elev-1);
+  white-space:nowrap;
+}
+.ge-badge__dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.ge-badge--neutral{color:var(--ink-500);}
+.ge-badge--volt{color:var(--volt-600);}
+.ge-badge--volt .ge-badge__dot{background:var(--volt-500);box-shadow:var(--glow-volt-sm);}
+.ge-badge--positive{color:var(--signal-positive);}
+.ge-badge--negative{color:var(--signal-negative);}
+.ge-badge--caution{color:#8a6d2e;}
+.ge-badge--caution .ge-badge__dot{background:var(--signal-caution);}
+.ge-badge--solid{background:var(--ink-900);color:var(--ink-25);box-shadow:var(--elev-dark-1);}
+.ge-badge--solid .ge-badge__dot{background:var(--volt-400);box-shadow:var(--glow-volt-sm);}
+
+/* ---- SpecRow — the engineering readout: mono KEY ······ value ---- */
+.ge-spec{
+  display:flex;align-items:baseline;gap:10px;
+  font-family:var(--font-mono);font-size:13px;line-height:1.7;
+  padding:7px 0;border-bottom:1px solid var(--border-subtle);
+}
+.ge-spec:last-child{border-bottom:none;}
+.ge-spec__key{
+  color:var(--ink-400);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
+  white-space:nowrap;flex:none;
+}
+.ge-spec__lead{
+  flex:1;border-bottom:1px dotted var(--ink-200);transform:translateY(-3px);min-width:14px;
+}
+.ge-spec__val{color:var(--ink-900);font-weight:500;white-space:nowrap;flex:none;text-align:right;}
+.ge-spec--dark .ge-spec__key{color:var(--ink-400);}
+.ge-spec--dark .ge-spec__lead{border-color:var(--ink-700);}
+.ge-spec--dark .ge-spec__val{color:var(--ink-25);}
+.ge-spec--dark{border-color:rgba(255,255,255,.08);}
+.ge-spec__val--volt{color:var(--volt-500) !important;}

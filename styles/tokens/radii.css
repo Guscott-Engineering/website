@@ -1,0 +1,19 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — RADII & BORDERS
+   Tight, geometric, mechanical. Square-leaning corners.
+   ============================================================ */
+
+:root {
+  --radius-0:    0px;
+  --radius-xs:   2px;
+  --radius-sm:   4px;   /* default control radius */
+  --radius-md:   6px;
+  --radius-lg:   10px;  /* cards */
+  --radius-xl:   16px;  /* large panels */
+  --radius-2xl:  22px;
+  --radius-pill: 999px;
+
+  --border-width-hair: 1px;
+  --border-width:      1.5px;
+  --border-width-bold: 2px;
+}

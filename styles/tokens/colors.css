@@ -1,0 +1,82 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — COLOR SYSTEM
+   Monochrome ink scale + a single electric "voltage" accent,
+   with a tightly-controlled spectrum used ONLY as image highlights.
+   ============================================================ */
+
+:root {
+  /* ---- INK SCALE (cool-tinted neutral, near-black → paper) ---- */
+  --ink-1000: #050608;
+  --ink-900:  #0A0C0F;
+  --ink-800:  #121519;
+  --ink-700:  #1C2026;
+  --ink-600:  #2A2F37;
+  --ink-500:  #434953;
+  --ink-400:  #646B75;
+  --ink-300:  #8B929B;
+  --ink-200:  #B9BFC6;
+  --ink-150:  #D2D7DC;
+  --ink-100:  #E3E7EA;
+  --ink-50:   #EFF1F3;
+  --ink-25:   #F6F7F8;
+  --paper:    #FAFBFC;
+  --white:    #FFFFFF;
+
+  /* ---- VOLTAGE — the single UI accent ---- */
+  --volt-700: #1B3FCC;
+  --volt-600: #2348E6;
+  --volt-500: #2D5BFF;   /* primary accent */
+  --volt-400: #5A82FF;
+  --volt-300: #9DB4FF;
+  --volt-100: #E2E9FF;
+  --volt-glow: rgba(45, 91, 255, 0.45);
+
+  /* ---- SPECTRUM — reserved for highlights on product imagery only ---- */
+  --spec-cyan:    #19E5FF;
+  --spec-magenta: #FF3DD1;
+  --spec-lime:    #C6FF3D;
+  --spec-amber:   #FF8A1E;
+
+  /* ---- SIGNAL — semantic states, muted & cooled toward the voltage family ---- */
+  --signal-positive: #55997D;
+  --signal-negative: #C75A63;
+  --signal-caution:  #B8924A;
+  --signal-info:     var(--volt-500);
+
+  /* ============================================================
+     SEMANTIC ALIASES — reach for these in components
+     ============================================================ */
+
+  /* Surfaces */
+  --surface-page:     var(--paper);
+  --surface-card:     var(--white);
+  --surface-sunken:   var(--ink-25);
+  --surface-raised:   var(--white);
+  --surface-inverse:  var(--ink-900);
+  --surface-inverse-2:var(--ink-800);
+
+  /* Text */
+  --text-strong:   var(--ink-900);
+  --text-body:     var(--ink-700);
+  --text-muted:    var(--ink-400);
+  --text-faint:    var(--ink-300);
+  --text-inverse:  var(--ink-25);
+  --text-on-accent:#FFFFFF;
+  --text-accent:   var(--volt-600);
+
+  /* Borders / hairlines */
+  --border-strong: var(--ink-300);
+  --border-default:var(--ink-150);
+  --border-subtle: var(--ink-100);
+  --border-inverse:rgba(255,255,255,0.12);
+  --hairline:      rgba(10,12,15,0.10);
+
+  /* Accent semantics */
+  --accent:        var(--volt-500);
+  --accent-hover:  var(--volt-600);
+  --accent-press:  var(--volt-700);
+  --accent-soft:   var(--volt-100);
+
+  /* Highlight / focus */
+  --focus-ring: 0 0 0 3px var(--volt-glow);
+}

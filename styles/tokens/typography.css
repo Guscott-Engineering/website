@@ -1,0 +1,71 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — TYPOGRAPHY
+   Display + UI: Comfortaa (rounded geometric)
+   Spec / labels / data: JetBrains Mono (engineering readouts)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* ---- Families ---- */
+  --font-display: "Comfortaa", "Helvetica Neue", Arial, sans-serif;
+  --font-sans:    "Comfortaa", "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+
+  /* ---- Weights ---- */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+
+  /* ---- Type scale (1.25-ish, tuned) ---- */
+  --text-display:   clamp(44px, 6vw, 76px);
+  --text-h1:        clamp(34px, 4.4vw, 52px);
+  --text-h2:        clamp(27px, 3vw, 36px);
+  --text-h3:        24px;
+  --text-h4:        20px;
+  --text-lg:        18px;
+  --text-base:      16px;
+  --text-sm:        14px;
+  --text-xs:        13px;
+  --text-2xs:       11px;
+
+  /* ---- Line heights ---- */
+  --leading-tight:  1.02;
+  --leading-snug:   1.18;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.65;
+
+  /* ---- Tracking (tuned for Comfortaa — rounded, wide) ---- */
+  --tracking-display: 0.005em;
+  --tracking-tight:   0;
+  --tracking-normal:  0;
+  --tracking-label:   0.14em;   /* mono micro-labels, uppercase */
+  --tracking-wide:    0.06em;
+}
+
+/* ---- Reusable type roles ---- */
+.gs-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-strong);
+}
+.gs-h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--text-h1); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); color: var(--text-strong); }
+.gs-h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-h2); line-height: var(--leading-snug); letter-spacing: var(--tracking-tight); color: var(--text-strong); }
+.gs-h3 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-h3); line-height: var(--leading-snug); letter-spacing: var(--tracking-tight); color: var(--text-strong); }
+.gs-body { font-family: var(--font-sans); font-weight: 400; font-size: var(--text-base); line-height: var(--leading-relaxed); color: var(--text-body); }
+.gs-small { font-family: var(--font-sans); font-weight: 400; font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--text-muted); }
+
+/* The signature engineering micro-label */
+.gs-label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gs-mono { font-family: var(--font-mono); font-weight: 400; font-size: var(--text-sm); letter-spacing: 0; color: var(--text-body); }

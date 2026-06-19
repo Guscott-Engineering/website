@@ -1,0 +1,165 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — GEOMETRY / FACET SYSTEM
+   Sharp 45° chamfers, faceted concrete planes, diagonal cuts.
+   The architectural motif: angular surfaces catching a single
+   light source — triangular highlight + shadow planes.
+   ============================================================ */
+
+:root {
+  /* ---- Chamfer / cut sizes (the corner bevel) ---- */
+  --cut-sm: 10px;
+  --cut-md: 18px;
+  --cut-lg: 28px;
+  --cut-xl: 44px;
+
+  /* ---- Facet plane shades (monochrome light model, top-left light) ---- */
+  --facet-hi:    rgba(255, 255, 255, 0.55);  /* lit plane */
+  --facet-hi-2:  rgba(255, 255, 255, 0.26);  /* half-lit */
+  --facet-lo:    rgba(10, 12, 15, 0.10);      /* shadowed plane */
+  --facet-lo-2:  rgba(10, 12, 15, 0.05);      /* ambient */
+  --facet-tile:  58px;                        /* faceted texture cell */
+
+  /* ---- On dark surfaces ---- */
+  --facet-dk-hi:   rgba(255, 255, 255, 0.07);
+  --facet-dk-hi-2: rgba(255, 255, 255, 0.035);
+  --facet-dk-lo:   rgba(0, 0, 0, 0.40);
+  --facet-dk-lo-2: rgba(0, 0, 0, 0.22);
+}
+
+/* ============================================================
+   UTILITY: CHAMFERED CORNERS (clip-path)
+   Note: clip-path clips box-shadow. Use on flat / dark / image
+   surfaces, not on raised cards that rely on --elev-*.
+   ============================================================ */
+
+.ge-cut {            /* top-right + bottom-left cut — the signature asymmetric facet */
+  clip-path: polygon(
+    var(--cut-md) 0, 100% 0, 100% calc(100% - var(--cut-md)),
+    calc(100% - var(--cut-md)) 100%, 0 100%, 0 var(--cut-md)
+  );
+}
+.ge-cut--sm {
+  clip-path: polygon(
+    var(--cut-sm) 0, 100% 0, 100% calc(100% - var(--cut-sm)),
+    calc(100% - var(--cut-sm)) 100%, 0 100%, 0 var(--cut-sm)
+  );
+}
+.ge-cut--lg {
+  clip-path: polygon(
+    var(--cut-lg) 0, 100% 0, 100% calc(100% - var(--cut-lg)),
+    calc(100% - var(--cut-lg)) 100%, 0 100%, 0 var(--cut-lg)
+  );
+}
+.ge-cut--xl {
+  clip-path: polygon(
+    var(--cut-xl) 0, 100% 0, 100% calc(100% - var(--cut-xl)),
+    calc(100% - var(--cut-xl)) 100%, 0 100%, 0 var(--cut-xl)
+  );
+}
+
+.ge-cut-all {        /* all four corners chamfered — octagonal precision plate */
+  clip-path: polygon(
+    var(--cut-md) 0, calc(100% - var(--cut-md)) 0, 100% var(--cut-md),
+    100% calc(100% - var(--cut-md)), calc(100% - var(--cut-md)) 100%,
+    var(--cut-md) 100%, 0 calc(100% - var(--cut-md)), 0 var(--cut-md)
+  );
+}
+
+.ge-cut-tr {         /* single top-right cut — directional, like the facade openings */
+  clip-path: polygon(
+    0 0, calc(100% - var(--cut-md)) 0, 100% var(--cut-md), 100% 100%, 0 100%
+  );
+}
+
+/* ============================================================
+   UTILITY: FACETED FIELD (low-poly concrete texture)
+   A pinwheel of light/shadow triangles tiled across the surface.
+   ============================================================ */
+
+.ge-facet-field {
+  background-color: var(--ink-100);
+  background-image:
+    conic-gradient(from 45deg at 50% 50%,
+      var(--facet-hi) 0deg 90deg,
+      var(--facet-lo) 90deg 180deg,
+      var(--facet-lo-2) 180deg 270deg,
+      var(--facet-hi-2) 270deg 360deg);
+  background-size: var(--facet-tile) var(--facet-tile);
+}
+
+.ge-facet-field--dark {
+  background-color: var(--ink-900);
+  background-image:
+    conic-gradient(from 45deg at 50% 50%,
+      var(--facet-dk-hi) 0deg 90deg,
+      var(--facet-dk-lo) 90deg 180deg,
+      var(--facet-dk-lo-2) 180deg 270deg,
+      var(--facet-dk-hi-2) 270deg 360deg);
+  background-size: var(--facet-tile) var(--facet-tile);
+}
+
+/* Diagonal hairline rule — a single sharp cut line, brand divider */
+.ge-diagonal {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0, transparent 7px,
+    var(--hairline) 7px, var(--hairline) 8px
+  );
+}
+
+/* ============================================================
+   UTILITY: RADIANT / DANDELION
+   Fine straight lines emanating from a single point. The abstract
+   counterpoint to the hard facets — energy from a central origin.
+   Tune the origin with --rx/--ry, density with --spoke-gap,
+   color with --spoke, and the falloff with --radiant-fade.
+   ============================================================ */
+:root {
+  --spoke:        rgba(10, 12, 15, 0.16);
+  --spoke-dk:     rgba(255, 255, 255, 0.3);
+  --spoke-gap:    6deg;     /* angle between spokes */
+  --spoke-weight: 0.4deg;   /* spoke thickness */
+  --radiant-fade: 60%;      /* solid radius before fade-out */
+}
+
+.ge-radiant {
+  background-repeat: no-repeat;
+  background-image: repeating-conic-gradient(
+    from 0deg at var(--rx, 50%) var(--ry, 50%),
+    var(--spoke) 0deg var(--spoke-weight),
+    transparent var(--spoke-weight) var(--spoke-gap)
+  );
+  -webkit-mask-image: radial-gradient(closest-side at var(--rx, 50%) var(--ry, 50%), #000 0%, #000 var(--radiant-fade), transparent 100%);
+          mask-image: radial-gradient(closest-side at var(--rx, 50%) var(--ry, 50%), #000 0%, #000 var(--radiant-fade), transparent 100%);
+}
+.ge-radiant--dark {
+  background-image: repeating-conic-gradient(
+    from 0deg at var(--rx, 50%) var(--ry, 50%),
+    var(--spoke-dk) 0deg var(--spoke-weight),
+    transparent var(--spoke-weight) var(--spoke-gap)
+  );
+}
+.ge-radiant--fine {
+  background-image: repeating-conic-gradient(
+    from 0deg at var(--rx, 50%) var(--ry, 50%),
+    var(--spoke) 0deg 0.3deg, transparent 0.3deg 3.4deg
+  );
+}
+.ge-radiant--dark.ge-radiant--fine {
+  background-image: repeating-conic-gradient(
+    from 0deg at var(--rx, 50%) var(--ry, 50%),
+    var(--spoke-dk) 0deg 0.3deg, transparent 0.3deg 3.4deg
+  );
+}
+.ge-radiant--bold {
+  background-image: repeating-conic-gradient(
+    from 0deg at var(--rx, 50%) var(--ry, 50%),
+    var(--spoke) 0deg 1deg, transparent 1deg 12deg
+  );
+}
+.ge-radiant--dark.ge-radiant--bold {
+  background-image: repeating-conic-gradient(
+    from 0deg at var(--rx, 50%) var(--ry, 50%),
+    var(--spoke-dk) 0deg 1deg, transparent 1deg 12deg
+  );
+}

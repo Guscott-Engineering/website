@@ -1,0 +1,77 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — ELEVATION & DEPTH
+   The signature system. Surfaces POP OUT (raised) or RECEDE IN
+   (inset). Dual-shadow construction: a directional cast shadow
+   for depth + a top highlight edge for the "machined" look.
+   Light comes from top-left.
+   ============================================================ */
+
+:root {
+  /* ---- RAISED — element pops toward the viewer ---- */
+  --elev-1:
+    0 1px 1px rgba(10,12,15,0.06),
+    0 2px 4px rgba(10,12,15,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.65);
+
+  --elev-2:
+    0 1px 2px rgba(10,12,15,0.08),
+    0 4px 10px rgba(10,12,15,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+
+  --elev-3:
+    0 2px 4px rgba(10,12,15,0.10),
+    0 10px 24px rgba(10,12,15,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.75);
+
+  --elev-4:
+    0 4px 8px rgba(10,12,15,0.12),
+    0 18px 44px rgba(10,12,15,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+
+  /* The "lifted hardware" — biggest pop, used on hero product cards */
+  --elev-5:
+    0 8px 16px rgba(10,12,15,0.14),
+    0 32px 70px rgba(10,12,15,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.85);
+
+  /* ---- INSET — element recedes into the surface (wells, inputs, tracks) ---- */
+  --inset-1:
+    inset 0 1px 2px rgba(10,12,15,0.14),
+    inset 0 -1px 0 rgba(255,255,255,0.5);
+
+  --inset-2:
+    inset 0 2px 5px rgba(10,12,15,0.18),
+    inset 0 -1px 0 rgba(255,255,255,0.55);
+
+  --inset-3:
+    inset 0 3px 9px rgba(10,12,15,0.24),
+    inset 0 -1px 0 rgba(255,255,255,0.5);
+
+  /* ---- ON DARK SURFACES — highlight edge on top, deep cast below ---- */
+  --elev-dark-1:
+    0 1px 2px rgba(0,0,0,0.5),
+    0 6px 16px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+
+  --elev-dark-2:
+    0 4px 8px rgba(0,0,0,0.55),
+    0 18px 44px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+
+  --inset-dark-1:
+    inset 0 2px 6px rgba(0,0,0,0.6),
+    inset 0 -1px 0 rgba(255,255,255,0.06);
+
+  /* ---- VOLTAGE GLOW — accent emission, used sparingly ---- */
+  --glow-volt:   0 0 0 1px var(--volt-500), 0 4px 18px var(--volt-glow);
+  --glow-volt-sm:0 2px 10px var(--volt-glow);
+
+  /* ---- Motion ---- */
+  /* crisp, precise settle */
+  --ease-mechanical: cubic-bezier(0.2, 0, 0, 1);
+  /* slight overshoot */
+  --ease-pop: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   340ms;
+}

@@ -1,0 +1,36 @@
+/* ============================================================
+   GUSCOTT ENGINEERING — SPACING
+   4px base grid. Mechanical, consistent rhythm.
+   ============================================================ */
+
+:root {
+  --space-0:  0px;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* Semantic spacing */
+  --gutter:        var(--space-6);
+  --section-pad:   var(--space-24);
+  --card-pad:      var(--space-6);
+  --control-pad-x: var(--space-4);
+  --control-pad-y: var(--space-3);
+  --stack-tight:   var(--space-2);
+  --stack:         var(--space-4);
+  --stack-loose:   var(--space-8);
+
+  /* Layout */
+  --container-max: 1200px;
+  --container-wide:1440px;
+  --content-max:   720px;
+}
