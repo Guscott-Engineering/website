@@ -18,6 +18,7 @@ img{max-width:100%;}
 .ge-navlink{
   font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
   text-transform:uppercase;color:var(--ink-300);text-decoration:none;
+  padding:9px 12px;
   transition:color .15s;
 }
 .ge-navlink:hover{color:#fff;}

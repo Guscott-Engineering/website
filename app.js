@@ -34,7 +34,7 @@
       var el = document.getElementById(link.getAttribute("data-scroll"));
       if (!el) return;
       e.preventDefault();
-      var top = el.getBoundingClientRect().top + window.pageYOffset - 64;
+      var top = el.getBoundingClientRect().top + window.pageYOffset - 72;
       window.scrollTo({ top: top, behavior: "smooth" });
     });
   });
