@@ -1,0 +1,6 @@
+# Original camera files — not web-displayable; keep the exported .jpeg instead
+*.HEIC
+*.heic
+
+# macOS
+.DS_Store
