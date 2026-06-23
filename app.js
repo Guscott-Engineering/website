@@ -50,4 +50,37 @@
       setTimeout(icons, 250);
     }
   })();
+
+  // ---- Adaptive header tone -----------------------------------------------
+  // The fixed header floats over sections of alternating brightness. Flip it
+  // to a light frosted bar whenever the section directly behind it is light, so
+  // it never reads as a heavy dark slab over pale content. Sections declare
+  // their brightness with data-tone="dark" / "light".
+  var header = document.querySelector(".ge-header");
+  var toned = Array.prototype.slice.call(document.querySelectorAll("[data-tone]"));
+  if (header && toned.length) {
+    var ticking = false;
+    var updateHeaderTone = function () {
+      ticking = false;
+      var probe = header.offsetHeight / 2; // a point inside the bar
+      var tone = "dark"; // default (e.g. above the first section)
+      for (var i = 0; i < toned.length; i++) {
+        var r = toned[i].getBoundingClientRect();
+        if (r.top <= probe && r.bottom > probe) {
+          tone = toned[i].getAttribute("data-tone");
+          break;
+        }
+      }
+      header.classList.toggle("ge-header--light", tone === "light");
+    };
+    var onScroll = function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateHeaderTone);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    updateHeaderTone(); // set the correct state on load
+  }
 })();

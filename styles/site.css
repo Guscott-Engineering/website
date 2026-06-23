@@ -23,6 +23,27 @@ img{max-width:100%;}
 }
 .ge-navlink:hover{color:#fff;}
 
+/* ---- Header bar (adaptive light/dark) ----
+   Fixed bar floats over sections of alternating brightness. Default theme is
+   dark (over dark sections); app.js adds .ge-header--light over light ones. */
+.ge-header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  background:rgba(10,12,15,.62);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  transition:background .3s ease, border-color .3s ease;
+}
+.ge-header--light{
+  background:rgba(250,251,252,.72);
+  border-bottom:1px solid var(--hairline);
+}
+.ge-logo{color:#fff;transition:color .3s ease;}
+.ge-logo__sub{color:var(--volt-400);transition:color .3s ease;}
+.ge-header--light .ge-logo{color:var(--ink-900);}
+.ge-header--light .ge-logo__sub{color:var(--volt-600);}
+.ge-header--light .ge-navlink{color:var(--ink-600);}
+.ge-header--light .ge-navlink:hover{color:var(--ink-900);}
+
 /* ---- Responsive section grids ---- */
 .ge-hero-grid{display:grid;grid-template-columns:1fr;gap:44px;align-items:center;}
 @media(min-width:920px){.ge-hero-grid{grid-template-columns:1.05fr .95fr;gap:60px;}}
