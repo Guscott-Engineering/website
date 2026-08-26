@@ -156,6 +156,34 @@ export default function App() {
 
       {/* Main Page Scroll Area */}
       <ScrollView
+      {/* Dynamic Build Galleries for PC1 through PC5 */}
+<View id="available" data-tone="dark" style={styles.section}>
+  <MachineGallery 
+    machineId="pc1" 
+    folderTag="PC1" 
+    title="Custom PC Workstation 01" 
+  />
+  <MachineGallery 
+    machineId="pc2" 
+    folderTag="PC2" 
+    title="Custom PC Workstation 02" 
+  />
+  <MachineGallery 
+    machineId="pc3" 
+    folderTag="PC3" 
+    title="Custom PC Workstation 03" 
+  />
+  <MachineGallery 
+    machineId="pc4" 
+    folderTag="PC4" 
+    title="Custom PC Workstation 04" 
+  />
+  <MachineGallery 
+    machineId="pc5" 
+    folderTag="PC5" 
+    title="Custom PC Workstation 05" 
+  />
+</View>
         ref={scrollViewRef}
         contentContainerStyle={styles.container}
         onScroll={handleScroll}
