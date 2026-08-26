@@ -1,4 +1,4 @@
-const CLOUD_NAME = 'YOUR_CLOUDINARY_CLOUD_NAME';
+const CLOUD_NAME = 'guscottengineeringcomputers';
 
 export const fetchFolderImages = async (tagName) => {
   try {
