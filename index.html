@@ -22,7 +22,6 @@
 <link rel="stylesheet" href="styles/components.css">
 <link rel="stylesheet" href="styles/site.css">
 
-<!-- Lucide icons (CDN, same as the source design) -->
 <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
@@ -62,7 +61,7 @@
         <div style="animation:geFade .6s .12s var(--ease-mechanical) both;position:relative;">
           <div class="ge-cut" style="position:absolute;inset:-1.5px;background:linear-gradient(135deg,var(--volt-500) 0%,transparent 50%);opacity:.7;"></div>
           <div class="ge-cut" style="position:relative;background:var(--ink-1000);aspect-ratio:4/5;box-shadow:var(--elev-dark-2);">
-            <img id="hero-image" src="https://via.placeholder.com/400x500?text=Loading..." alt="Custom build, powered on" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <img data-image-key="hero-main" src="data:," alt="Custom build, powered on" style="width:100%;height:100%;object-fit:cover;display:block;">
           </div>
           <div style="position:absolute;bottom:14px;left:14px;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-200);background:rgba(10,12,15,.6);padding:5px 9px;border-radius:3px;">Lian Li · RX 6700 · NZXT cooled</div>
         </div>
@@ -76,9 +75,8 @@
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-600);margin-bottom:10px;">Available Now</div>
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:var(--ink-900);margin:0 0 8px;letter-spacing:.005em;">Ready to ship</h2>
       <p style="font-size:16px;line-height:1.6;color:var(--text-muted);max-width:54ch;margin:0 0 38px;">Each machine is fully assembled, bench-tested, and ready for local pickup in Atlanta. Message Ayden to claim one.</p>
-
-      <div id="machines-container" style="display:grid;gap:24px;">
-        <!-- Machine cards loaded here -->
+      <div id="machines-container" class="ge-avail-grid">
+        <!-- Machine cards injected by cloudinary-config.json loader -->
       </div>
     </div>
   </section>
@@ -90,11 +88,9 @@
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:10px;">Previously Built</div>
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:#fff;margin:0 0 8px;letter-spacing:.005em;">Proof on the bench</h2>
       <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Past builds and projects loaded from Cloudinary.</p>
-
       <div id="portfolio-container" class="ge-portfolio-grid" style="margin-bottom:16px;">
-        <!-- Portfolio images loaded here -->
+        <!-- Portfolio images injected by cloudinary-config.json loader -->
       </div>
-
       <div class="ge-break-grid">
         <div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Build log</div>
@@ -115,20 +111,20 @@
         <div style="position:relative;">
           <div class="ge-cut" style="position:absolute;inset:-1.5px;background:linear-gradient(135deg,var(--volt-500) 0%,transparent 50%);opacity:.5;"></div>
           <div class="ge-cut" style="position:relative;background:var(--ink-1000);aspect-ratio:4/3;box-shadow:var(--elev-dark-2);">
-            <img src="images/workdesk.jpeg" alt="Ayden's workbench" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <img data-image-key="about-workdesk" src="data:," alt="Ayden's workbench — open case and tools on the desk" style="width:100%;height:100%;object-fit:cover;display:block;">
           </div>
         </div>
         <div>
           <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-600);margin-bottom:12px;">About Ayden</div>
           <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3vw,36px);color:var(--ink-900);margin:0 0 18px;letter-spacing:.005em;line-height:1.15;">Ten years on the bench</h2>
-          <p style="font-size:16px;line-height:1.7;color:var(--text-body);margin:0 0 16px;">Ayden has been building computers for about ten years. He does it because he likes making things come to life with his own hands.</p>
-          <p style="font-size:16px;line-height:1.7;color:var(--text-body);margin:0;">What sets him apart is that he's always there to help you through your computer journey.</p>
+          <p style="font-size:16px;line-height:1.7;color:var(--text-body);margin:0 0 16px;">Ayden has been building computers for about ten years. He does it because he likes making things come to life with his own hands — and seeing how excited people get when the lights come on and everything just works.</p>
+          <p style="font-size:16px;line-height:1.7;color:var(--text-body);margin:0;">A machine is a machine. What sets him apart is that he's always there to help you through your computer journey — especially now, when so many people feel left behind by tech.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ TESTIMONIALS ============ -->
+  <!-- ============ TESTIMONIALS (placeholder) ============ -->
   <section data-tone="light" style="background:var(--paper);">
     <div style="max-width:1100px;margin:0 auto;padding:52px 24px;text-align:center;">
       <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">What customers say</div>
@@ -138,7 +134,7 @@
     </div>
   </section>
 
-  <!-- ============ TRUST ============ -->
+  <!-- ============ TRUST / BUYING ============ -->
   <section data-tone="light" style="background:var(--paper);">
     <div style="max-width:1100px;margin:0 auto;padding:80px 24px;">
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-600);margin-bottom:10px;">How buying works</div>
@@ -152,12 +148,12 @@
         <div class="ge-card ge-card--pad">
           <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="wallet"></i></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Payment</div>
-          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Pay by Zelle, Cash App, or cash.</p>
+          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Pay by Zelle, Cash App, or cash. Whatever's easiest for you.</p>
         </div>
         <div class="ge-card ge-card--pad">
           <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="map-pin"></i></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Local pickup</div>
-          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Local to Atlanta, GA — built for local pickup.</p>
+          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Local to Atlanta, GA — built for local pickup, set up in person.</p>
         </div>
       </div>
     </div>
@@ -170,7 +166,7 @@
     <div style="position:relative;max-width:760px;margin:0 auto;padding:92px 24px;text-align:center;">
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt-400);margin-bottom:16px;">Get in touch</div>
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(30px,4vw,48px);color:#fff;margin:0 0 16px;letter-spacing:.005em;">Let's build something</h2>
-      <p style="font-size:17px;line-height:1.6;color:var(--ink-300);margin:0 0 40px;">Questions on a build, or want one of the machines? Reach out — Ayden answers personally.</p>
+      <p style="font-size:17px;line-height:1.6;color:var(--ink-300);margin:0 0 40px;">Questions on a build, or want one of the machines above? Reach out — Ayden answers personally.</p>
       <div class="ge-contact-grid" style="margin-bottom:40px;text-align:left;">
         <div style="box-shadow:var(--elev-dark-1);background:var(--ink-800);border-radius:8px;padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);">
           <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin-bottom:7px;">Email</div>
@@ -178,13 +174,14 @@
         </div>
         <div style="box-shadow:var(--elev-dark-1);background:var(--ink-800);border-radius:8px;padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);">
           <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin-bottom:7px;">Facebook Marketplace</div>
-          <span style="font-family:var(--font-mono);font-size:13px;color:var(--ink-100);">Search "Ayden"</span>
+          <span style="font-family:var(--font-mono);font-size:13px;color:var(--ink-100);">Search "Ayden" / Guscott Engineering</span>
         </div>
         <div style="box-shadow:var(--elev-dark-1);background:var(--ink-800);border-radius:8px;padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);">
           <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin-bottom:7px;">Location</div>
           <span style="font-family:var(--font-mono);font-size:13px;color:var(--ink-100);">Atlanta, GA</span>
         </div>
       </div>
+      <a class="ge-btn ge-btn--primary ge-btn--lg" href="mailto:Guscottengineering@gmail.com">Email Ayden</a>
     </div>
   </section>
 
@@ -202,106 +199,86 @@
 </main>
 
 <script>
-// ===== CLOUDINARY CONFIGURATION =====
-const CLOUD_NAME = 'mediaflows_c35240ce-22f4-4298-8c8b-702031f0d76e';
-const API_KEY = '186936914467547';
+// ===== IMAGE LOADING FROM cloudinary-config.json =====
 
-// Machine folder tags and prices
-const MACHINES = [
-  { id: 'm1', tag: 'PC1', title: 'Custom PC Workstation 01', price: '$800' },
-  { id: 'm2', tag: 'PC2', title: 'Custom PC Workstation 02', price: '$900' },
-  { id: 'm3', tag: 'PC3', title: 'Custom PC Workstation 03', price: '$1100' },
-  { id: 'm4', tag: 'PC4', title: 'Custom PC Workstation 04', price: '$1200' },
-  { id: 'm5', tag: 'PC5', title: 'Custom PC Workstation 05', price: '$1500' },
-];
+let _config = null;
 
-// ===== END CONFIGURATION =====
+async function loadConfig() {
+  if (_config) return _config;
+  const response = await fetch('cloudinary-config.json');
+  _config = await response.json();
+  return _config;
+}
 
-// Helper: Generate transformations URL for image
-function getCloudinaryUrl(publicId, width = null, height = null, crop = 'fill') {
-  let url = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload`;
+function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
+  let url = `https://res.cloudinary.com/${cloudName}/image/upload`;
   if (width || height) {
-    url += `/w_${width || 'auto'},h_${height || 'auto'},c_${crop}`;
+    url += `/w_${width || 'auto'},h_${height || 'auto'},c_${crop || 'fill'}`;
   }
   url += `/${publicId}`;
   return url;
 }
 
-// Fetch images from Cloudinary using Search API
-async function fetchCloudinaryImages(tag) {
+async function fetchCloudinaryImages(cloudName, tag) {
   try {
-    // Using the Search API to find files with folder tag
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/resources/search`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          expression: `folder:"${tag}"`,
-          sort_by: [['uploaded_at', 'desc']],
-          max_results: 100,
-        }),
-      }
+      `https://res.cloudinary.com/${cloudName}/image/list/${tag}.json`
     );
-
     if (!response.ok) {
-      console.warn(`Search API error for ${tag}:`, response.status);
+      console.warn(`Tag list error for ${tag}:`, response.status);
       return [];
     }
-
     const data = await response.json();
     if (!data.resources) return [];
-
     return data.resources.map(file => ({
       public_id: file.public_id,
-      secure_url: file.secure_url,
-      thumb: getCloudinaryUrl(file.public_id, 150, 150, 'thumb'),
+      secure_url: `https://res.cloudinary.com/${cloudName}/image/upload/${file.public_id}.${file.format}`,
+      thumb: getCloudinaryUrl(cloudName, `${file.public_id}.${file.format}`, 150, 150, 'thumb'),
     }));
   } catch (error) {
-    console.warn(`Error fetching images for ${tag}:`, error);
+    console.warn(`Error fetching images for tag ${tag}:`, error);
     return [];
   }
 }
 
-// Load hero image
-async function loadHero() {
-  try {
-    const images = await fetchCloudinaryImages('hero');
-    if (images.length > 0) {
-      document.getElementById('hero-image').src = images[0].secure_url;
-    }
-  } catch (e) {
-    console.error('Hero load error:', e);
+async function injectStaticImages(config) {
+  const allSingleImageKeys = { ...config.images.hero, ...config.images.about };
+  for (const [key, entry] of Object.entries(allSingleImageKeys)) {
+    const els = document.querySelectorAll(`[data-image-key="${key}"]`);
+    if (!els.length) continue;
+    const images = await fetchCloudinaryImages(config.cloudName, entry.tag);
+    const src = images.length > 0 ? images[0].secure_url : entry.fallback;
+    els.forEach(el => {
+      el.src = src;
+      if (entry.alt && !el.getAttribute('alt')) el.alt = entry.alt;
+    });
   }
 }
 
-// Load available machines
-async function loadMachines() {
+async function loadMachines(config) {
   try {
     const container = document.getElementById('machines-container');
+    if (!container) return;
+    const machines = Object.entries(config.images.machines).map(([id, m]) => ({ id, ...m }));
     let hasAny = false;
 
-    for (const machine of MACHINES) {
-      const images = await fetchCloudinaryImages(machine.tag);
-      
+    for (const machine of machines) {
+      const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
       if (images.length === 0) continue;
-      
       hasAny = true;
       const mainImg = images[0];
-      
-      let thumbsHtml = images.map((img, idx) => `
-        <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}" 
-          style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx===0?'#00ffcc':'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;">
+
+      const thumbsHtml = images.map((img, idx) => `
+        <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
+          style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
+          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}">
         </button>
       `).join('');
 
-      const html = `
+      container.insertAdjacentHTML('beforeend', `
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
-            <div class="ge-cut" style="background:var(--ink-1000);aspect-ratio:4/5;">
+            <div class="ge-cut" style="background:var(--ink-1000);aspect-ratio:16/9;">
               <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
             </div>
             <div style="position:absolute;top:12px;left:12px;">
@@ -314,18 +291,13 @@ async function loadMachines() {
             ${thumbsHtml}
           </div>
         </div>
-      `;
+      `);
 
-      container.insertAdjacentHTML('beforeend', html);
-
-      // Add click handlers
       document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(btn => {
         btn.addEventListener('click', function() {
           const idx = parseInt(this.getAttribute('data-idx'));
-          const mainImg = document.getElementById(`${machine.id}-main`);
-          if (mainImg && images[idx]) {
-            mainImg.src = images[idx].secure_url;
-          }
+          const mainEl = document.getElementById(`${machine.id}-main`);
+          if (mainEl && images[idx]) mainEl.src = images[idx].secure_url;
           document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
             b.style.borderColor = 'transparent';
           });
@@ -335,18 +307,19 @@ async function loadMachines() {
     }
 
     if (!hasAny) {
-      document.getElementById('available').style.display = 'none';
+      const availSection = document.getElementById('available');
+      if (availSection) availSection.style.display = 'none';
     }
   } catch (e) {
     console.error('Machines load error:', e);
   }
 }
 
-// Load portfolio
-async function loadPortfolio() {
+async function loadPortfolio(config) {
   try {
-    const images = await fetchCloudinaryImages('portfolio');
+    const images = await fetchCloudinaryImages(config.cloudName, config.images.portfolio.gallery.tag);
     const container = document.getElementById('portfolio-container');
+    if (!container) return;
 
     if (images.length === 0) {
       container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-400);"><p>No portfolio images yet. Upload to the portfolio folder in Cloudinary.</p></div>';
@@ -365,14 +338,40 @@ async function loadPortfolio() {
   }
 }
 
-// Load everything when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Loading from Cloudinary...');
-  loadHero();
-  loadMachines();
-  loadPortfolio();
+// ===== ADAPTIVE HEADER TONE SWITCHING =====
+function updateHeaderTone() {
+  const header = document.querySelector('.ge-header');
+  if (!header) return;
+  const probe = header.getBoundingClientRect().bottom - 1;
+  let tone = 'dark';
+  document.querySelectorAll('[data-tone]').forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (r.top <= probe && r.bottom > probe) {
+      tone = el.getAttribute('data-tone');
+    }
+  });
+  header.classList.toggle('ge-header--light', tone === 'light');
+}
+
+// ===== BOOT =====
+document.addEventListener('DOMContentLoaded', async function() {
+  // Init Lucide icons
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // Adaptive header on scroll
+  window.addEventListener('scroll', updateHeaderTone, { passive: true });
+  updateHeaderTone();
+
+  // Load images from config
+  try {
+    const config = await loadConfig();
+    await injectStaticImages(config);
+    await loadMachines(config);
+    await loadPortfolio(config);
+  } catch (e) {
+    console.error('Failed to load cloudinary-config.json:', e);
+  }
 });
 </script>
-
 </body>
 </html>
