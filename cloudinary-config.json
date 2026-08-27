@@ -1,0 +1,31 @@
+{
+  "cloudName": "guscottengineeringcomputers",
+  "images": {
+    "hero": {
+      "hero-main": {
+        "tag": "hero",
+        "fallback": "images/IMG_3399.JPG",
+        "alt": "Custom build, powered on"
+      }
+    },
+    "about": {
+      "about-workdesk": {
+        "tag": "about",
+        "fallback": "images/workdesk.jpeg",
+        "alt": "Ayden's workbench — open case and tools on the desk"
+      }
+    },
+    "machines": {
+      "m1": { "tag": "PC1", "title": "Custom PC Workstation 01", "price": "$800" },
+      "m2": { "tag": "PC2", "title": "Custom PC Workstation 02", "price": "$900" },
+      "m3": { "tag": "PC3", "title": "Custom PC Workstation 03", "price": "$1100" },
+      "m4": { "tag": "PC4", "title": "Custom PC Workstation 04", "price": "$1200" },
+      "m5": { "tag": "PC5", "title": "Custom PC Workstation 05", "price": "$1500" }
+    },
+    "portfolio": {
+      "gallery": {
+        "tag": "portfolio"
+      }
+    }
+  }
+}
