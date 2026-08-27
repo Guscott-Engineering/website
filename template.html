@@ -82,8 +82,8 @@ async function fetchCloudinaryImages(cloudName, tag) {
     if (!data.resources) return [];
     return data.resources.map(file => ({
       public_id: file.public_id,
-      secure_url: `https://res.cloudinary.com/${cloudName}/image/upload/${file.public_id}.${file.format}`,
-      thumb: getCloudinaryUrl(cloudName, `${file.public_id}.${file.format}`, 150, 150, 'thumb'),
+      secure_url: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/${file.public_id}.jpg`,
+      thumb: getCloudinaryUrl(cloudName, `f_auto,q_auto/${file.public_id}.jpg`, 150, 150, 'thumb'),
     }));
   } catch (error) {
     console.warn(`Error fetching images for tag ${tag}:`, error);
