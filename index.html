@@ -77,8 +77,9 @@
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:var(--ink-900);margin:0 0 8px;letter-spacing:.005em;">Ready to ship</h2>
       <p style="font-size:16px;line-height:1.6;color:var(--text-muted);max-width:54ch;margin:0 0 38px;">Each machine is fully assembled, bench-tested, and ready for local pickup in Atlanta. Message Ayden to claim one.</p>
 
-      <!-- Cloudinary Dynamic Gallery Container -->
-      <div id="cloudinary-galleries" style="display:grid;gap:24px;"></div>
+      <div id="machines-container" style="display:grid;gap:24px;">
+        <!-- Machine cards loaded here -->
+      </div>
     </div>
   </section>
 
@@ -88,11 +89,11 @@
     <div style="position:relative;max-width:1100px;margin:0 auto;padding:88px 24px;">
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:10px;">Previously Built</div>
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:#fff;margin:0 0 8px;letter-spacing:.005em;">Proof on the bench</h2>
-      <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Past builds and projects. Photos loaded from Cloudinary.</p>
+      <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Past builds and projects loaded from Cloudinary.</p>
 
-      <!-- Dynamic Portfolio Grid -->
-      <div id="portfolio-grid" class="ge-portfolio-grid" style="margin-bottom:16px;"></div>
-      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-400);margin-bottom:54px;" id="portfolio-caption">Loading portfolio...</div>
+      <div id="portfolio-container" class="ge-portfolio-grid" style="margin-bottom:16px;">
+        <!-- Portfolio images loaded here -->
+      </div>
 
       <div class="ge-break-grid">
         <div>
@@ -200,151 +201,177 @@
 
 </main>
 
-<!-- Scripts with Error Handling -->
 <script>
-console.log('Guscott Engineering site loading...');
+// ===== CLOUDINARY CONFIGURATION =====
+const CLOUD_NAME = 'mediaflows_c35240ce-22f4-4298-8c8b-702031f0d76e';
+const API_KEY = '186936914467547';
 
-// Wait for DOM to be ready, then load Cloudinary content
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM ready, starting Cloudinary load');
-  
-  const CLOUD_NAME = 'guscottengineeringcomputers';
-  
-  // Load Hero
-  loadHero();
-  
-  // Load Available Machines
-  loadAvailableMachines();
-  
-  // Load Portfolio
-  loadPortfolio();
-});
+// Machine folder tags and prices
+const MACHINES = [
+  { id: 'm1', tag: 'PC1', title: 'Custom PC Workstation 01', price: '$800' },
+  { id: 'm2', tag: 'PC2', title: 'Custom PC Workstation 02', price: '$900' },
+  { id: 'm3', tag: 'PC3', title: 'Custom PC Workstation 03', price: '$1100' },
+  { id: 'm4', tag: 'PC4', title: 'Custom PC Workstation 04', price: '$1200' },
+  { id: 'm5', tag: 'PC5', title: 'Custom PC Workstation 05', price: '$1500' },
+];
 
-function loadHero() {
+// ===== END CONFIGURATION =====
+
+// Helper: Generate transformations URL for image
+function getCloudinaryUrl(publicId, width = null, height = null, crop = 'fill') {
+  let url = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload`;
+  if (width || height) {
+    url += `/w_${width || 'auto'},h_${height || 'auto'},c_${crop}`;
+  }
+  url += `/${publicId}`;
+  return url;
+}
+
+// Fetch images from Cloudinary using Search API
+async function fetchCloudinaryImages(tag) {
   try {
-    const heroImage = document.getElementById('hero-image');
-    if (!heroImage) return;
-    
-    fetch('https://res.cloudinary.com/guscottengineeringcomputers/image/list/hero.json')
-      .then(r => r.json())
-      .then(data => {
-        if (data.resources && data.resources[0]) {
-          const img = data.resources[0];
-          heroImage.src = `https://res.cloudinary.com/guscottengineeringcomputers/image/upload/v${img.version}/${img.public_id}.${img.format}`;
-        }
-      })
-      .catch(e => console.warn('Hero load failed:', e));
-  } catch (e) {
-    console.error('loadHero error:', e);
+    // Using the Search API to find files with folder tag
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/resources/search`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          expression: `folder:"${tag}"`,
+          sort_by: [['uploaded_at', 'desc']],
+          max_results: 100,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`Search API error for ${tag}:`, response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    if (!data.resources) return [];
+
+    return data.resources.map(file => ({
+      public_id: file.public_id,
+      secure_url: file.secure_url,
+      thumb: getCloudinaryUrl(file.public_id, 150, 150, 'thumb'),
+    }));
+  } catch (error) {
+    console.warn(`Error fetching images for ${tag}:`, error);
+    return [];
   }
 }
 
-function loadAvailableMachines() {
+// Load hero image
+async function loadHero() {
   try {
-    const container = document.getElementById('cloudinary-galleries');
-    if (!container) return;
-    
-    const machines = [
-      { id: 'm1', tag: 'PC1', title: 'Custom PC Workstation 01', price: '$800' },
-      { id: 'm2', tag: 'PC2', title: 'Custom PC Workstation 02', price: '$900' },
-      { id: 'm3', tag: 'PC3', title: 'Custom PC Workstation 03', price: '$1100' },
-      { id: 'm4', tag: 'PC4', title: 'Custom PC Workstation 04', price: '$1200' },
-      { id: 'm5', tag: 'PC5', title: 'Custom PC Workstation 05', price: '$1500' },
-    ];
-    
+    const images = await fetchCloudinaryImages('hero');
+    if (images.length > 0) {
+      document.getElementById('hero-image').src = images[0].secure_url;
+    }
+  } catch (e) {
+    console.error('Hero load error:', e);
+  }
+}
+
+// Load available machines
+async function loadMachines() {
+  try {
+    const container = document.getElementById('machines-container');
     let hasAny = false;
-    
-    machines.forEach(machine => {
-      fetch(`https://res.cloudinary.com/guscottengineeringcomputers/image/list/${machine.tag}.json`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.resources && data.resources.length > 0) {
-            hasAny = true;
-            const images = data.resources;
-            const mainImg = images[0];
-            const mainUrl = `https://res.cloudinary.com/guscottengineeringcomputers/image/upload/v${mainImg.version}/${mainImg.public_id}.${mainImg.format}`;
-            
-            let thumbsHtml = images.map((img, i) => {
-              const thumbUrl = `https://res.cloudinary.com/guscottengineeringcomputers/image/upload/c_thumb,w_150/v${img.version}/${img.public_id}.${img.format}`;
-              return `<button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${i}" style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${i===0?'#00ffcc':'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;"><img src="${thumbUrl}" style="width:100%;height:100%;object-fit:cover;display:block;"></button>`;
-            }).join('');
-            
-            const html = `
-              <div class="ge-card ge-card--pad">
-                <div style="position:relative;">
-                  <div class="ge-cut" style="background:var(--ink-1000);aspect-ratio:4/5;">
-                    <img id="${machine.id}-main" src="${mainUrl}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
-                  </div>
-                  <div style="position:absolute;top:12px;left:12px;">
-                    <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
-                  </div>
-                </div>
-                <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${machine.title}</h3>
-                <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${machine.price}</p>
-                <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
-                  ${thumbsHtml}
-                </div>
-              </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', html);
-            
-            // Add thumb click handlers
-            document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(btn => {
-              btn.addEventListener('click', function() {
-                const idx = parseInt(this.getAttribute('data-idx'));
-                const mainImg = document.getElementById(`${machine.id}-main`);
-                if (mainImg && images[idx]) {
-                  const img = images[idx];
-                  mainImg.src = `https://res.cloudinary.com/guscottengineeringcomputers/image/upload/v${img.version}/${img.public_id}.${img.format}`;
-                }
-                document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
-                  b.style.borderColor = 'transparent';
-                });
-                this.style.borderColor = '#00ffcc';
-              });
-            });
+
+    for (const machine of MACHINES) {
+      const images = await fetchCloudinaryImages(machine.tag);
+      
+      if (images.length === 0) continue;
+      
+      hasAny = true;
+      const mainImg = images[0];
+      
+      let thumbsHtml = images.map((img, idx) => `
+        <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}" 
+          style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx===0?'#00ffcc':'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
+          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        </button>
+      `).join('');
+
+      const html = `
+        <div class="ge-card ge-card--pad">
+          <div style="position:relative;">
+            <div class="ge-cut" style="background:var(--ink-1000);aspect-ratio:4/5;">
+              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+            </div>
+            <div style="position:absolute;top:12px;left:12px;">
+              <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
+            </div>
+          </div>
+          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${machine.title}</h3>
+          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${machine.price}</p>
+          <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
+            ${thumbsHtml}
+          </div>
+        </div>
+      `;
+
+      container.insertAdjacentHTML('beforeend', html);
+
+      // Add click handlers
+      document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(btn => {
+        btn.addEventListener('click', function() {
+          const idx = parseInt(this.getAttribute('data-idx'));
+          const mainImg = document.getElementById(`${machine.id}-main`);
+          if (mainImg && images[idx]) {
+            mainImg.src = images[idx].secure_url;
           }
-        })
-        .catch(e => console.warn(`Machine ${machine.tag} load failed:`, e));
+          document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
+            b.style.borderColor = 'transparent';
+          });
+          this.style.borderColor = '#00ffcc';
+        });
+      });
+    }
+
+    if (!hasAny) {
+      document.getElementById('available').style.display = 'none';
+    }
+  } catch (e) {
+    console.error('Machines load error:', e);
+  }
+}
+
+// Load portfolio
+async function loadPortfolio() {
+  try {
+    const images = await fetchCloudinaryImages('portfolio');
+    const container = document.getElementById('portfolio-container');
+
+    if (images.length === 0) {
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-400);"><p>No portfolio images yet. Upload to the portfolio folder in Cloudinary.</p></div>';
+      return;
+    }
+
+    images.forEach(img => {
+      const slot = document.createElement('div');
+      slot.className = 'ge-slot ge-cut';
+      slot.style.aspectRatio = '4/5';
+      slot.innerHTML = `<img src="${img.secure_url}" alt="Portfolio build" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+      container.appendChild(slot);
     });
   } catch (e) {
-    console.error('loadAvailableMachines error:', e);
+    console.error('Portfolio load error:', e);
   }
 }
 
-function loadPortfolio() {
-  try {
-    const grid = document.getElementById('portfolio-grid');
-    if (!grid) return;
-    
-    fetch('https://res.cloudinary.com/guscottengineeringcomputers/image/list/portfolio.json')
-      .then(r => r.json())
-      .then(data => {
-        if (data.resources && data.resources.length > 0) {
-          grid.innerHTML = '';
-          data.resources.forEach((img, idx) => {
-            const url = `https://res.cloudinary.com/guscottengineeringcomputers/image/upload/v${img.version}/${img.public_id}.${img.format}`;
-            const slot = document.createElement('div');
-            slot.className = 'ge-slot ge-cut';
-            slot.style.aspectRatio = '4/5';
-            slot.innerHTML = `<img src="${url}" alt="Build ${idx+1}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
-            grid.appendChild(slot);
-          });
-          
-          const caption = document.getElementById('portfolio-caption');
-          if (caption) {
-            caption.textContent = `${data.resources.length} build${data.resources.length !== 1 ? 's' : ''} · Custom builds`;
-          }
-        }
-      })
-      .catch(e => console.warn('Portfolio load failed:', e));
-  } catch (e) {
-    console.error('loadPortfolio error:', e);
-  }
-}
-
-console.log('Scripts loaded successfully');
+// Load everything when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Loading from Cloudinary...');
+  loadHero();
+  loadMachines();
+  loadPortfolio();
+});
 </script>
 
 </body>
