@@ -4,43 +4,76 @@
   <div style="position:relative;max-width:1100px;margin:0 auto;padding:88px 24px;">
     <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:10px;">Previously Built</div>
     <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:#fff;margin:0 0 8px;letter-spacing:.005em;">Proof on the bench</h2>
-    <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">A look at past work. These slots hold the powered-on shots — drop your own photos in to fill them.</p>
+    <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Past builds and projects. Photos are loaded dynamically from Cloudinary — add or remove images by uploading to the <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:3px;font-family:var(--font-mono);font-size:13px;">portfolio</code> folder.</p>
 
-    <div class="ge-portfolio-grid" style="margin-bottom:16px;">
-      <div class="ge-slot ge-facet-field--dark ge-cut" style="aspect-ratio:4/5;"><span class="ge-slot__ico"><i data-lucide="image"></i></span><span class="ge-slot__cap">Intel Arc<br>build</span></div>
-      <div class="ge-slot ge-facet-field--dark ge-cut" style="aspect-ratio:4/5;"><span class="ge-slot__ico"><i data-lucide="image"></i></span><span class="ge-slot__cap">Intel Arc<br>build</span></div>
-      <div class="ge-slot ge-facet-field--dark ge-cut" style="aspect-ratio:4/5;"><span class="ge-slot__ico"><i data-lucide="image"></i></span><span class="ge-slot__cap">Intel Arc<br>build</span></div>
-      <div class="ge-slot ge-facet-field--dark ge-cut" style="aspect-ratio:4/5;"><span class="ge-slot__ico"><i data-lucide="image"></i></span><span class="ge-slot__cap">Intel Arc<br>build</span></div>
-      <div class="ge-slot ge-facet-field--dark ge-cut" style="aspect-ratio:4/5;"><span class="ge-slot__ico"><i data-lucide="image"></i></span><span class="ge-slot__cap">Intel Arc<br>build</span></div>
+    <!-- Dynamic Portfolio Grid -->
+    <div id="portfolio-grid" class="ge-portfolio-grid" style="margin-bottom:16px;">
+      <!-- Images loaded here by JavaScript -->
     </div>
-    <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-400);margin-bottom:54px;">Custom build — Intel Arc, T-Force RAM, Enermax cooling.</div>
+    <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-400);margin-bottom:54px;" id="portfolio-caption">Loading portfolio...</div>
 
     <div class="ge-break-grid">
       <div>
-        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:12px;">Transparent Pricing</div>
-        <h3 style="font-family:var(--font-display);font-weight:600;font-size:24px;color:#fff;margin:0 0 14px;line-height:1.25;">No mystery markups</h3>
-        <p style="font-size:15px;line-height:1.65;color:var(--ink-300);margin:0 0 18px;">Here's the full breakdown from a past build — parts and labor, line by line. This is a separate build from the photos above.</p>
-        <p style="font-family:var(--font-mono);font-size:13px;line-height:1.6;color:var(--ink-200);margin:0;">Specs and pricing built to fit each customer.</p>
+        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Build log</div>
+        <p style="font-size:15px;line-height:1.7;color:var(--ink-300);margin:0;">Each machine is bench-tested for stability before it ships. Thermal load testing, memory checks, and a full boot cycle under load.</p>
       </div>
-      <div class="ge-card ge-card--dark ge-card--pad">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px;">
-          <h4 style="font-family:var(--font-display);font-weight:600;font-size:18px;color:#fff;margin:0;">Sample build breakdown</h4>
-          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-400);">Past build</span>
-        </div>
-        <div style="font-family:var(--font-mono);font-size:13px;color:var(--ink-300);margin-bottom:14px;">Build total <span style="color:var(--volt-400);font-weight:500;">$790</span> · $640 parts + $150 labor</div>
-        <div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">CPU</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Intel i7-10700K — $160</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">GPU</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Customer-supplied</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">Board</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Motherboard — $65</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">Memory</span><span class="ge-spec__lead"></span><span class="ge-spec__val">16GB RGB — $100</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">Storage</span><span class="ge-spec__lead"></span><span class="ge-spec__val">M.2 SSD — $125</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">PSU</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Power supply — $40</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">Case</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Chassis — $100</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">Cooling</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Liquid — $40</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">WiFi</span><span class="ge-spec__lead"></span><span class="ge-spec__val">Adapter — $10</span></div>
-          <div class="ge-spec ge-spec--dark"><span class="ge-spec__key">Labor</span><span class="ge-spec__lead"></span><span class="ge-spec__val ge-spec__val--volt">Assembly · OS · setup — $150</span></div>
-        </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Specs vary</div>
+        <p style="font-size:15px;line-height:1.7;color:var(--ink-300);margin:0;">CPU, GPU, RAM, and storage are spec'd to the project. No two machines are identical.</p>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Portfolio Image Loader Script -->
+<script>
+(async () => {
+  const CLOUD_NAME = 'guscottengineeringcomputers';
+  const PORTFOLIO_FOLDER = 'portfolio'; // Cloudinary folder for portfolio images
+
+  async function loadPortfolioImages() {
+    try {
+      const response = await fetch(
+        `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${PORTFOLIO_FOLDER}.json`
+      );
+      const data = await response.json();
+      
+      if (!data.resources || data.resources.length === 0) {
+        document.getElementById('portfolio-grid').innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-400);">
+            <p style="margin:0;">No portfolio images uploaded yet. Upload images to the <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:3px;font-family:var(--font-mono);">portfolio</code> folder in Cloudinary.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const grid = document.getElementById('portfolio-grid');
+      grid.innerHTML = '';
+
+      data.resources.forEach((image, idx) => {
+        const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v${image.version}/${image.public_id}.${image.format}`;
+        const slot = document.createElement('div');
+        slot.className = 'ge-slot ge-cut';
+        slot.style.aspectRatio = '4/5';
+        slot.innerHTML = `
+          <img src="${imageUrl}" alt="Portfolio image ${idx + 1}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        `;
+        grid.appendChild(slot);
+      });
+
+      // Update caption
+      document.getElementById('portfolio-caption').textContent = 
+        `${data.resources.length} build${data.resources.length !== 1 ? 's' : ''} · Custom builds · Intel Arc, T-Force RAM, Enermax cooling.`;
+    } catch (error) {
+      console.error('Error loading portfolio images:', error);
+      document.getElementById('portfolio-grid').innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-600);">
+          <p style="margin:0;">Could not load portfolio images. Please check Cloudinary configuration.</p>
+        </div>
+      `;
+    }
+  }
+
+  loadPortfolioImages();
+})();
+</script>
