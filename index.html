@@ -88,9 +88,12 @@
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:10px;">Previously Built</div>
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:#fff;margin:0 0 8px;letter-spacing:.005em;">Proof on the bench</h2>
       <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Past builds and projects loaded from Cloudinary.</p>
-      <div id="portfolio-container" class="ge-portfolio-grid" style="margin-bottom:16px;">
-        <!-- Portfolio images injected by cloudinary-config.json loader -->
+
+      <!-- Catalog carousel -->
+      <div class="ge-catalog-wrap" id="portfolio-catalog" style="margin-bottom:32px;">
+        <!-- Slides injected by JS -->
       </div>
+
       <div class="ge-break-grid">
         <div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Build log</div>
@@ -103,6 +106,22 @@
       </div>
     </div>
   </section>
+
+  <!-- ============ PC DETAIL MODAL ============ -->
+  <div id="ge-pc-modal" role="dialog" aria-modal="true" aria-labelledby="ge-modal-title"
+    style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px;">
+    <div style="position:relative;background:var(--ink-900);border:1px solid rgba(255,255,255,.12);border-radius:12px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;">
+      <button id="ge-modal-close" aria-label="Close"
+        style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--ink-300);cursor:pointer;font-size:22px;line-height:1;padding:4px;">&#x2715;</button>
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;" id="ge-modal-eyebrow">Specs</div>
+      <h3 id="ge-modal-title" style="font-family:var(--font-display);font-weight:700;font-size:22px;color:#fff;margin:0 0 6px;"></h3>
+      <p id="ge-modal-price" style="font-size:20px;font-weight:700;color:var(--volt-400);margin:0 0 24px;font-family:var(--font-mono);"></p>
+      <div id="ge-modal-specs" class="ge-spec-list"></div>
+      <div style="margin-top:28px;text-align:center;">
+        <a class="ge-btn ge-btn--primary" href="mailto:Guscottengineering@gmail.com" id="ge-modal-cta">Email Ayden about this build</a>
+      </div>
+    </div>
+  </div>
 
   <!-- ============ ABOUT AYDEN ============ -->
   <section id="about" data-tone="light" style="background:var(--paper);scroll-margin-top:72px;">
@@ -268,6 +287,9 @@ async function loadMachines(config) {
       hasAny = true;
       const mainImg = images[0];
 
+      // Store specs for the modal
+      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null };
+
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
@@ -290,6 +312,8 @@ async function loadMachines(config) {
           <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
             ${thumbsHtml}
           </div>
+          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-id="${machine.id}"
+            style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
         </div>
       `);
 
@@ -318,24 +342,112 @@ async function loadMachines(config) {
 async function loadPortfolio(config) {
   try {
     const images = await fetchCloudinaryImages(config.cloudName, config.images.portfolio.gallery.tag);
-    const container = document.getElementById('portfolio-container');
-    if (!container) return;
+    const catalog = document.getElementById('portfolio-catalog');
+    if (!catalog) return;
 
     if (images.length === 0) {
-      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-400);"><p>No portfolio images yet. Upload to the portfolio folder in Cloudinary.</p></div>';
+      catalog.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink-400);">No portfolio images yet. Upload to the portfolio folder in Cloudinary.</div>';
       return;
     }
 
-    images.forEach(img => {
-      const slot = document.createElement('div');
-      slot.className = 'ge-slot ge-cut';
-      slot.style.aspectRatio = '4/5';
-      slot.innerHTML = `<img src="${img.secure_url}" alt="Portfolio build" style="width:100%;height:100%;object-fit:cover;display:block;">`;
-      container.appendChild(slot);
-    });
+    // Build slides — show 3 thumbnails per page
+    const pageSize = 3;
+    const pages = [];
+    for (let i = 0; i < images.length; i += pageSize) {
+      pages.push(images.slice(i, i + pageSize));
+    }
+
+    const slidesHtml = pages.map((page, pageIdx) => `
+      <div class="ge-catalog-slide" data-page="${pageIdx}" style="display:${pageIdx === 0 ? 'grid' : 'none'};grid-template-columns:repeat(${page.length},1fr);gap:12px;">
+        ${page.map(img => `
+          <div class="ge-catalog-item ge-cut" style="aspect-ratio:4/5;overflow:hidden;cursor:pointer;" onclick="openLightbox('${img.secure_url}')">
+            <img src="${img.secure_url}" alt="Portfolio build" loading="lazy"
+              style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;">
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+
+    const dotsHtml = pages.map((_, i) => `
+      <button class="ge-catalog-dot" data-dot="${i}" aria-label="Page ${i + 1}"
+        style="width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;padding:0;background:${i === 0 ? 'var(--volt-400)' : 'var(--ink-600)'};transition:background .2s;"></button>
+    `).join('');
+
+    catalog.innerHTML = `
+      <div style="position:relative;">
+        ${slidesHtml}
+        ${pages.length > 1 ? `
+        <button class="ge-catalog-prev" aria-label="Previous"
+          style="position:absolute;left:-18px;top:50%;transform:translateY(-50%);background:var(--ink-800);border:1px solid rgba(255,255,255,.12);color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;">&#8249;</button>
+        <button class="ge-catalog-next" aria-label="Next"
+          style="position:absolute;right:-18px;top:50%;transform:translateY(-50%);background:var(--ink-800);border:1px solid rgba(255,255,255,.12);color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;">&#8250;</button>
+        ` : ''}
+      </div>
+      ${pages.length > 1 ? `<div style="display:flex;justify-content:center;gap:8px;margin-top:20px;">${dotsHtml}</div>` : ''}
+    `;
+
+    // Lightbox element
+    if (!document.getElementById('ge-lightbox')) {
+      const lb = document.createElement('div');
+      lb.id = 'ge-lightbox';
+      lb.style.cssText = 'display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.9);align-items:center;justify-content:center;cursor:zoom-out;';
+      lb.innerHTML = '<img id="ge-lightbox-img" style="max-width:92vw;max-height:90vh;border-radius:8px;object-fit:contain;" alt="Portfolio image">';
+      lb.addEventListener('click', () => { lb.style.display = 'none'; });
+      document.body.appendChild(lb);
+    }
+
+    // Navigation logic
+    let currentPage = 0;
+    const slides = catalog.querySelectorAll('.ge-catalog-slide');
+    const dots = catalog.querySelectorAll('.ge-catalog-dot');
+
+    function goToPage(idx) {
+      slides[currentPage].style.display = 'none';
+      dots[currentPage] && (dots[currentPage].style.background = 'var(--ink-600)');
+      currentPage = (idx + pages.length) % pages.length;
+      slides[currentPage].style.display = 'grid';
+      dots[currentPage] && (dots[currentPage].style.background = 'var(--volt-400)');
+    }
+
+    catalog.querySelector('.ge-catalog-prev')?.addEventListener('click', () => goToPage(currentPage - 1));
+    catalog.querySelector('.ge-catalog-next')?.addEventListener('click', () => goToPage(currentPage + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goToPage(i)));
+
   } catch (e) {
     console.error('Portfolio load error:', e);
   }
+}
+
+function openLightbox(src) {
+  const lb = document.getElementById('ge-lightbox');
+  const img = document.getElementById('ge-lightbox-img');
+  if (lb && img) { img.src = src; lb.style.display = 'flex'; }
+}
+
+// ===== PC DETAIL MODAL =====
+const _machineSpecs = {};
+
+function openMachineModal(machineId) {
+  const data = _machineSpecs[machineId];
+  if (!data) return;
+  document.getElementById('ge-modal-title').textContent = data.title;
+  document.getElementById('ge-modal-price').textContent = data.price;
+  const specList = document.getElementById('ge-modal-specs');
+  specList.innerHTML = data.specs ? Object.entries(data.specs).map(([k, v]) => `
+    <div class="ge-spec ge-spec--dark">
+      <span class="ge-spec__key">${k}</span>
+      <span class="ge-spec__lead"></span>
+      <span class="ge-spec__val">${v}</span>
+    </div>
+  `).join('') : '';
+  const modal = document.getElementById('ge-pc-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMachineModal() {
+  document.getElementById('ge-pc-modal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // ===== ADAPTIVE HEADER TONE SWITCHING =====
@@ -361,6 +473,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Adaptive header on scroll
   window.addEventListener('scroll', updateHeaderTone, { passive: true });
   updateHeaderTone();
+
+  // Modal close handlers
+  document.getElementById('ge-modal-close')?.addEventListener('click', closeMachineModal);
+  document.getElementById('ge-pc-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeMachineModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeMachineModal();
+  });
+
+  // Details buttons (delegated — injected after config loads)
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.ge-details-btn');
+    if (btn) openMachineModal(btn.getAttribute('data-machine-id'));
+  });
 
   // Load images from config
   try {
