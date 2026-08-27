@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guscott Engineering · Custom & Refurbished PCs · Atlanta, GA</title>
+<meta name="description" content="Guscott Engineering — custom and refurbished computers built and bench-tested by Ayden in Atlanta, GA. One machine at a time.">
+
+<!-- Favicons — chamfered "G" brand mark (resolves the /favicon.ico auto-request) -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- Design-system tokens (copied verbatim from the Guscott Engineering design system) -->
+<link rel="stylesheet" href="styles/tokens/colors.css">
+<link rel="stylesheet" href="styles/tokens/typography.css">
+<link rel="stylesheet" href="styles/tokens/spacing.css">
+<link rel="stylesheet" href="styles/tokens/radii.css">
+<link rel="stylesheet" href="styles/tokens/geometry.css">
+<link rel="stylesheet" href="styles/tokens/elevation.css">
+<!-- Components rebuilt from the design system + page layout -->
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/site.css">
+
+<!-- Lucide icons (CDN, same as the source design) -->
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+<main id="top" style="font-family:var(--font-sans);background:var(--paper);color:var(--text-body);min-height:100vh;">
+
+  <!-- ============ HEADER ============ -->
+  <header class="ge-header">
+    <div style="max-width:1100px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <a href="#top" style="text-decoration:none;display:flex;flex-direction:column;gap:3px;line-height:1;">
+        <span class="ge-logo" style="font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.02em;">GUSCOTT</span>
+        <span class="ge-logo__sub" style="font-family:var(--font-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;">Engineering Electronics</span>
+      </a>
+      <nav class="ge-nav" style="align-items:center;gap:6px;">
+        <a class="ge-navlink" href="#available">Available</a>
+        <a class="ge-navlink" href="#portfolio">Portfolio</a>
+        <a class="ge-navlink" href="#about">About</a>
+        <a class="ge-navlink" href="#contact">Contact</a>
+      </nav>
+      <a class="ge-btn ge-btn--primary ge-btn--sm" href="mailto:Guscottengineering@gmail.com">Email Ayden</a>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-25);overflow:hidden;">
+    <div style="position:absolute;inset:0;background:url(assets/converging-fields.svg) center/cover no-repeat;opacity:.45;pointer-events:none;"></div>
+    <div style="position:absolute;width:640px;height:640px;right:-180px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
+    <div style="position:relative;max-width:1100px;margin:0 auto;padding:136px 24px 94px;">
+      <div class="ge-hero-grid">
+        <div style="animation:geFade .6s var(--ease-mechanical) both;">
+          <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--volt-400);margin-bottom:22px;">Custom builds · Refurbished · Atlanta, GA</div>
+          <h1 style="font-family:var(--font-display);font-weight:700;font-size:clamp(40px,6vw,72px);line-height:1.05;letter-spacing:.005em;margin:0 0 22px;">Engineering from a<br>different angle</h1>
+          <p style="font-size:18px;line-height:1.6;color:var(--ink-200);max-width:44ch;margin:0 0 14px;">Building and refurbishing computers in Atlanta, GA — one machine at a time.</p>
+          <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin:0 0 36px;">Built by Ayden · Solo builder</p>
+          <a class="ge-btn ge-btn--primary ge-btn--lg" href="#available" data-scroll="available">See What's Available</a>
+        </div>
+        <div style="animation:geFade .6s .12s var(--ease-mechanical) both;position:relative;">
+          <div class="ge-cut" style="position:absolute;inset:-1.5px;background:linear-gradient(135deg,var(--volt-500) 0%,transparent 50%);opacity:.7;"></div>
+          <div class="ge-cut" style="position:relative;background:var(--ink-1000);aspect-ratio:4/5;box-shadow:var(--elev-dark-2);">
+            <img id="hero-image" src="https://via.placeholder.com/400x500?text=Loading..." alt="Custom build, powered on" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+          <div style="position:absolute;bottom:14px;left:14px;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-200);background:rgba(10,12,15,.6);padding:5px 9px;border-radius:3px;">Lian Li · RX 6700 · NZXT cooled</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AVAILABLE NOW ============ -->
+  <section id="available" data-tone="light" style="background:var(--paper);scroll-margin-top:72px;">
+    <div style="max-width:1100px;margin:0 auto;padding:88px 24px;">
+      <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-600);margin-bottom:10px;">Available Now</div>
+      <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:var(--ink-900);margin:0 0 8px;letter-spacing:.005em;">Ready to ship</h2>
+      <p style="font-size:16px;line-height:1.6;color:var(--text-muted);max-width:54ch;margin:0 0 38px;">Each machine is fully assembled, bench-tested, and ready for local pickup in Atlanta. Message Ayden to claim one.</p>
+
+      <!-- Cloudinary Dynamic Gallery Container -->
+      <div id="cloudinary-galleries" style="display:grid;gap:24px;"></div>
+    </div>
+  </section>
+
+  <!-- ============ PREVIOUSLY BUILT ============ -->
+  <section id="portfolio" data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-100);overflow:hidden;scroll-margin-top:72px;">
+    <div style="position:absolute;width:720px;height:720px;left:-220px;bottom:-280px;border-radius:50%;background:radial-gradient(circle,rgba(45,91,255,.16) 0%,transparent 60%);pointer-events:none;"></div>
+    <div style="position:relative;max-width:1100px;margin:0 auto;padding:88px 24px;">
+      <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:10px;">Previously Built</div>
+      <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:#fff;margin:0 0 8px;letter-spacing:.005em;">Proof on the bench</h2>
+      <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Past builds and projects. Photos are loaded dynamically from Cloudinary — add or remove images by uploading to the <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:3px;font-family:var(--font-mono);font-size:13px;">portfolio</code> folder.</p>
+
+      <!-- Dynamic Portfolio Grid -->
+      <div id="portfolio-grid" class="ge-portfolio-grid" style="margin-bottom:16px;">
+        <!-- Images loaded here by JavaScript -->
+      </div>
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-400);margin-bottom:54px;" id="portfolio-caption">Loading portfolio...</div>
+
+      <div class="ge-break-grid">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Build log</div>
+          <p style="font-size:15px;line-height:1.7;color:var(--ink-300);margin:0;">Each machine is bench-tested for stability before it ships. Thermal load testing, memory checks, and a full boot cycle under load.</p>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Specs vary</div>
+          <p style="font-size:15px;line-height:1.7;color:var(--ink-300);margin:0;">CPU, GPU, RAM, and storage are spec'd to the project. No two machines are identical.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT AYDEN ============ -->
+  <section id="about" data-tone="light" style="background:var(--paper);scroll-margin-top:72px;">
+    <div style="max-width:1100px;margin:0 auto;padding:88px 24px;">
+      <div class="ge-about-grid">
+        <div style="position:relative;">
+          <div class="ge-cut" style="position:absolute;inset:-1.5px;background:linear-gradient(135deg,var(--volt-500) 0%,transparent 50%);opacity:.5;"></div>
+          <div class="ge-cut" style="position:relative;background:var(--ink-1000);aspect-ratio:4/3;box-shadow:var(--elev-dark-2);">
+            <img src="images/workdesk.jpeg" alt="Ayden's workbench — open case and tools on the desk" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-600);margin-bottom:12px;">About Ayden</div>
+          <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3vw,36px);color:var(--ink-900);margin:0 0 18px;letter-spacing:.005em;line-height:1.15;">Ten years on the bench</h2>
+          <p style="font-size:16px;line-height:1.7;color:var(--text-body);margin:0 0 16px;">Ayden has been building computers for about ten years. He does it because he likes making things come to life with his own hands — and seeing how excited people get when the lights come on and everything just works.</p>
+          <p style="font-size:16px;line-height:1.7;color:var(--text-body);margin:0;">A machine is a machine. What sets him apart is that he's always there to help you through your computer journey — especially now, when so many people feel left behind by tech.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS (placeholder) ============ -->
+  <section data-tone="light" style="background:var(--paper);">
+    <div style="max-width:1100px;margin:0 auto;padding:52px 24px;text-align:center;">
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">What customers say</div>
+      <div style="max-width:560px;margin:0 auto;box-shadow:var(--inset-1);background:var(--white);border-radius:10px;padding:22px 26px;">
+        <p style="font-family:var(--font-sans);font-size:15px;line-height:1.6;color:var(--text-muted);margin:0;">First reviews are on the way. Every build is delivered and set up in person — your words will go here.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUST / BUYING ============ -->
+  <section data-tone="light" style="background:var(--paper);">
+    <div style="max-width:1100px;margin:0 auto;padding:80px 24px;">
+      <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-600);margin-bottom:10px;">How buying works</div>
+      <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3vw,36px);color:var(--ink-900);margin:0 0 34px;letter-spacing:.005em;">Straightforward, local, backed</h2>
+      <div class="ge-trust-grid">
+        <div class="ge-card ge-card--pad">
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="shield-check"></i></div>
+          <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Warranty</div>
+          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Something not right? Bring it back and we'll figure it out.</p>
+        </div>
+        <div class="ge-card ge-card--pad">
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="wallet"></i></div>
+          <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Payment</div>
+          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Pay by Zelle, Cash App, or cash. Whatever's easiest for you.</p>
+        </div>
+        <div class="ge-card ge-card--pad">
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="map-pin"></i></div>
+          <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Local pickup</div>
+          <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Local to Atlanta, GA — built for local pickup, set up in person.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-25);overflow:hidden;scroll-margin-top:72px;">
+    <div style="position:absolute;inset:0;background:url(assets/converging-fields.svg) center/cover no-repeat;opacity:.32;pointer-events:none;"></div>
+    <div style="position:absolute;width:560px;height:560px;right:-160px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
+    <div style="position:relative;max-width:760px;margin:0 auto;padding:92px 24px;text-align:center;">
+      <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt-400);margin-bottom:16px;">Get in touch</div>
+      <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(30px,4vw,48px);color:#fff;margin:0 0 16px;letter-spacing:.005em;">Let's build something</h2>
+      <p style="font-size:17px;line-height:1.6;color:var(--ink-300);margin:0 0 40px;">Questions on a build, or want one of the machines above? Reach out — Ayden answers personally.</p>
+      <div class="ge-contact-grid" style="margin-bottom:40px;text-align:left;">
+        <div style="box-shadow:var(--elev-dark-1);background:var(--ink-800);border-radius:8px;padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin-bottom:7px;">Email</div>
+          <a href="mailto:Guscottengineering@gmail.com" style="font-family:var(--font-mono);font-size:13px;color:var(--volt-300);text-decoration:none;">Send a message</a>
+        </div>
+        <div style="box-shadow:var(--elev-dark-1);background:var(--ink-800);border-radius:8px;padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin-bottom:7px;">Facebook Marketplace</div>
+          <span style="font-family:var(--font-mono);font-size:13px;color:var(--ink-100);">Search "Ayden" / Guscott Engineering</span>
+        </div>
+        <div style="box-shadow:var(--elev-dark-1);background:var(--ink-800);border-radius:8px;padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin-bottom:7px;">Location</div>
+          <span style="font-family:var(--font-mono);font-size:13px;color:var(--ink-100);">Atlanta, GA</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer data-tone="dark" style="background:var(--ink-1000);color:var(--ink-400);">
+    <div style="max-width:1100px;margin:0 auto;padding:30px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;flex-direction:column;gap:3px;line-height:1;">
+        <span style="font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.02em;color:var(--ink-100);">GUSCOTT</span>
+        <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--volt-400);">Engineering Electronics</span>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--ink-500);">© 2026 Guscott Engineering Electronics · Atlanta, GA</span>
+    </div>
+  </footer>
+
+</main>
+
+<!-- Hero Image Loader Script -->
+<script>
+(async () => {
+  const CLOUD_NAME = 'guscottengineeringcomputers';
+  const HERO_FOLDER = 'hero';
+
+  async function fetchHeroImage() {
+    try {
+      const response = await fetch(
+        `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${HERO_FOLDER}.json`
+      );
+      const data = await response.json();
+      
+      if (data.resources && data.resources.length > 0) {
+        const image = data.resources[0];
+        const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v${image.version}/${image.public_id}.${image.format}`;
+        const heroImg = document.getElementById('hero-image');
+        if (heroImg) {
+          heroImg.src = imageUrl;
+        }
+      }
+    } catch (error) {
+      console.warn('Could not load hero image from Cloudinary:', error);
+    }
+  }
+
+  fetchHeroImage();
+})();
+</script>
+
+<!-- Available Gallery Script -->
+<script>
+(async () => {
+  const CLOUD_NAME = 'guscottengineeringcomputers';
+  
+  const machines = [
+    { id: 'm1', folderTag: 'PC1', title: 'Custom PC Workstation 01', price: '$800' },
+    { id: 'm2', folderTag: 'PC2', title: 'Custom PC Workstation 02', price: '$900' },
+    { id: 'm3', folderTag: 'PC3', title: 'Custom PC Workstation 03', price: '$1100' },
+    { id: 'm4', folderTag: 'PC4', title: 'Custom PC Workstation 04', price: '$1200' },
+    { id: 'm5', folderTag: 'PC5', title: 'Custom PC Workstation 05', price: '$1500' },
+  ];
+
+  async function fetchCloudinaryImages(folderTag) {
+    try {
+      const response = await fetch(
+        `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${folderTag}.json`
+      );
+      const data = await response.json();
+      
+      if (!data.resources || data.resources.length === 0) {
+        return [];
+      }
+
+      return data.resources.map((file) => ({
+        id: file.public_id,
+        uri: `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v${file.version}/${file.public_id}.${file.format}`,
+        thumbUri: `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_thumb,w_150/v${file.version}/${file.public_id}.${file.format}`,
+      }));
+    } catch (error) {
+      console.error(`Error loading Cloudinary images for ${folderTag}:`, error);
+      return [];
+    }
+  }
+
+  function createGalleryHTML(machine, images) {
+    const mainImage = images[0];
+    const thumbnailsHTML = images
+      .map((img, idx) => `
+        <button 
+          class="ge-thumb-btn" 
+          data-machine="${machine.id}"
+          data-image-idx="${idx}"
+          style="flex:none;width:54px;height:54px;padding:0;border:2px solid transparent;border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;${idx === 0 ? 'border-color:#00ffcc;' : ''}"
+        >
+          <img src="${img.thumbUri}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        </button>
+      `)
+      .join('');
+
+    return `
+      <div class="ge-card ge-card--pad">
+        <div style="position:relative;">
+          <div class="ge-cut" style="background:var(--ink-1000);aspect-ratio:4/5;">
+            <img id="${machine.id}-main" src="${mainImage.uri}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+          <div style="position:absolute;top:12px;left:12px;">
+            <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
+          </div>
+        </div>
+        <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${machine.title}</h3>
+        <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${machine.price}</p>
+        <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
+          ${thumbnailsHTML}
+        </div>
+      </div>
+    `;
+  }
+
+  const galleriesContainer = document.getElementById('cloudinary-galleries');
+  const availableSection = document.getElementById('available').parentElement;
+  let hasAnyMachines = false;
+  
+  for (const machine of machines) {
+    const images = await fetchCloudinaryImages(machine.folderTag);
+    
+    if (images.length > 0) {
+      hasAnyMachines = true;
+      const html = createGalleryHTML(machine, images);
+      galleriesContainer.insertAdjacentHTML('beforeend', html);
+
+      document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.getAttribute('data-image-idx'));
+          const mainImg = document.getElementById(`${machine.id}-main`);
+          if (mainImg) {
+            mainImg.src = images[idx].uri;
+          }
+          document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(t => {
+            t.style.borderColor = 'transparent';
+          });
+          e.currentTarget.style.borderColor = '#00ffcc';
+        });
+      });
+    }
+  }
+
+  if (!hasAnyMachines) {
+    document.getElementById('available').style.display = 'none';
+  }
+})();
+</script>
+
+<!-- Portfolio Gallery Script -->
+<script>
+(async () => {
+  const CLOUD_NAME = 'guscottengineeringcomputers';
+  const PORTFOLIO_FOLDER = 'portfolio';
+
+  async function loadPortfolioImages() {
+    try {
+      const response = await fetch(
+        `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${PORTFOLIO_FOLDER}.json`
+      );
+      const data = await response.json();
+      
+      if (!data.resources || data.resources.length === 0) {
+        document.getElementById('portfolio-grid').innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-400);">
+            <p style="margin:0;">No portfolio images uploaded yet. Upload images to the <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:3px;font-family:var(--font-mono);">portfolio</code> folder in Cloudinary.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const grid = document.getElementById('portfolio-grid');
+      grid.innerHTML = '';
+
+      data.resources.forEach((image, idx) => {
+        const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v${image.version}/${image.public_id}.${image.format}`;
+        const slot = document.createElement('div');
+        slot.className = 'ge-slot ge-cut';
+        slot.style.aspectRatio = '4/5';
+        slot.innerHTML = `
+          <img src="${imageUrl}" alt="Portfolio image ${idx + 1}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        `;
+        grid.appendChild(slot);
+      });
+
+      document.getElementById('portfolio-caption').textContent = 
+        `${data.resources.length} build${data.resources.length !== 1 ? 's' : ''} · Custom builds · Intel Arc, T-Force RAM, Enermax cooling.`;
+    } catch (error) {
+      console.error('Error loading portfolio images:', error);
+    }
+  }
+
+  loadPortfolioImages();
+})();
+</script>
+
+</body>
+</html>
