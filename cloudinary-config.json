@@ -43,14 +43,13 @@
       "m3": {
         "tag": "PC3", "title": "Custom PC Workstation 03", "price": "$1100",
         "specs": {
-          "CPU": "Intel Core i5-12400F",
-          "GPU": "NVIDIA RTX 3060",
+          "CPU": "AMD Ryzen 7 2700X (8C / 16T)",
+          "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB FE",
           "RAM": "32 GB DDR4 3200 MHz",
-          "Storage": "1 TB NVMe SSD",
-          "Motherboard": "B660 ATX",
-          "Cooling": "240 mm AIO",
-          "Case": "Full-Tower ATX",
-          "OS": "Windows 11 Home"
+          "Storage": "500 GB SSD + 1 TB HDD",
+          "Motherboard": "GIGABYTE B450 AORUS PRO WIFI",
+          "PSU": "Corsair RM850e 850 W 80+ Gold Modular",
+          "Case": "Montech ATX Mid-Tower"
         }
       },
       "m4": {
