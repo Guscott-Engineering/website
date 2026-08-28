@@ -17,7 +17,7 @@
     },
     "machines": {
       "m1": {
-        "tag": "PC1", "title": "Custom PC Workstation 01", "price": "$900",
+        "tag": "PC1", "title": "Custom PC Workstation 01", "price": "$900", "sold": true,
         "specs": {
           "CPU": "AMD Ryzen 5 5600X (6C / 12T)",
           "GPU": "XFX RX 6700 10GB Speedster SWFT 309",
@@ -30,7 +30,7 @@
         }
       },
       "m2": {
-        "tag": "PC2", "title": "Custom PC Workstation 02", "price": "$750",
+        "tag": "PC2", "title": "Custom PC Workstation 02", "price": "$750", "sold": true,
         "specs": {
           "CPU": "AMD Ryzen 5 3600X (6C / 12T)",
           "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB OC",
@@ -41,7 +41,7 @@
         }
       },
       "m3": {
-        "tag": "PC3", "title": "Custom PC Workstation 03", "price": "$825",
+        "tag": "PC3", "title": "Custom PC Workstation 03", "price": "$825", "sold": true,
         "specs": {
           "CPU": "AMD Ryzen 7 2700X (8C / 16T)",
           "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB FE",

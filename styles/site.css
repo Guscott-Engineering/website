@@ -91,6 +91,55 @@ img{max-width:100%;}
 .ge-lico{display:inline-flex;}
 .ge-lico svg{width:1em;height:1em;}
 
+/* ---- Sold-builds peek carousel ---- */
+:root { --ge-sold-card-w: min(560px, 90vw); }
+.ge-sold-carousel { position:relative; }
+.ge-sold-track-wrap {
+  overflow: hidden;
+  /* Show ~half of adjacent cards on each side */
+  padding: 0 calc((100% - var(--ge-sold-card-w)) / 2);
+}
+.ge-sold-track {
+  display: flex;
+  gap: 24px;
+  transition: transform .42s cubic-bezier(.4,0,.2,1);
+}
+.ge-sold-card {
+  flex: 0 0 var(--ge-sold-card-w);
+  width: var(--ge-sold-card-w);
+  background: var(--ink-800);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: opacity .3s, transform .3s;
+}
+.ge-sold-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+.ge-sold-prev, .ge-sold-next {
+  background: rgba(10,10,10,.7);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #fff;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, transform .15s;
+  flex: none;
+}
+.ge-sold-prev:hover, .ge-sold-next:hover {
+  background: var(--ink-700);
+  transform: scale(1.08);
+}
+.ge-sold-dots { display: flex; gap: 8px; }
+.ge-sold-dot { transition: background .2s, transform .15s; }
+.ge-sold-dot:hover { transform: scale(1.3); }
+
 /* ---- Placeholder frames (replace the fillable image-slots) ----
    On-brand faceted dark frame with an icon + mono caption. Swap
    for a real <img> when product/workspace photos are available. */
