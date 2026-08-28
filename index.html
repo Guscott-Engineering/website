@@ -508,13 +508,13 @@ async function loadSoldBuilds(config) {
     track.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].clientX - touchStartX;
       if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
-    });
+    }, { passive: true });
 
     track.addEventListener('click', function(e) {
       const btn = e.target.closest('.ge-sold-thumb-btn');
       if (!btn) return;
       const machId = btn.getAttribute('data-sold-machine');
-      const imgIdx = parseInt(btn.getAttribute('data-idx'));
+      const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
       const deck = decks.find(d => d.machine.id === machId);
       if (!deck) return;
       const mainEl = document.getElementById(`${machId}-main`);
