@@ -207,14 +207,16 @@ img{max-width:100%;}
   .ge-sold-track,
   .ge-machine-img-wrap img,
   .ge-thumb-btn,
-  .ge-modal-thumb-btn,
+  .ge-modal-thumb-btn{
+    animation:none !important;
+    transition:none !important;
+    transform:none !important;
+  }
   .ge-port-prev,
   .ge-port-next,
   .ge-sold-prev,
   .ge-sold-next{
-    animation:none !important;
     transition:none !important;
-    transform:none !important;
   }
 }
 

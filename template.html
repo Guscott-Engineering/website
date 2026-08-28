@@ -548,7 +548,7 @@ function initSmoothSectionLinks() {
 
     e.preventDefault();
     if (window.location.hash !== href) {
-      history.replaceState(null, '', href);
+      history.pushState(null, '', href);
     }
     smoothScrollToSection(target);
   });
