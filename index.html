@@ -89,7 +89,6 @@
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);color:#fff;margin:0 0 8px;letter-spacing:.005em;">Proof on the bench</h2>
       <p style="font-size:16px;line-height:1.6;color:var(--ink-300);max-width:54ch;margin:0 0 32px;">Completed builds — these machines are no longer for sale, but show what Ayden can do. Click any card to explore specs and photos.</p>
 
-      <!-- ---- Sold-builds peek carousel ---- -->
       <div id="sold-builds-carousel" class="ge-sold-carousel" style="display:none;">
         <div class="ge-sold-track-wrap">
           <div id="sold-builds-track" class="ge-sold-track"></div>
@@ -296,7 +295,6 @@ async function loadMachines(config) {
     let hasAny = false;
 
     for (const machine of machines) {
-      if (machine.sold) continue; // sold machines are shown in portfolio carousel
       const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
       if (images.length === 0) continue;
       hasAny = true;
@@ -434,12 +432,10 @@ async function loadSoldBuilds(config) {
 
     if (machines.length === 0) return;
 
-    // Fetch images for each sold machine
     const decks = [];
     for (const machine of machines) {
       const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
       if (images.length === 0) continue;
-      // Store data in modal registry (reuses existing modal)
       _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
       decks.push({ machine, images });
     }
@@ -485,7 +481,6 @@ async function loadSoldBuilds(config) {
       track.appendChild(buildCard(deck, idx));
     });
 
-    // Dots
     const dots = [];
     if (decks.length > 1) {
       decks.forEach((_, i) => {
@@ -501,7 +496,6 @@ async function loadSoldBuilds(config) {
 
     function goTo(idx) {
       current = ((idx % decks.length) + decks.length) % decks.length;
-      // Shift the track: each card is 100% wide; neighbours peek via CSS
       track.style.transform = `translateX(calc(${current} * (var(--ge-sold-card-w) + 24px) * -1))`;
       dots.forEach((d, i) => d.style.background = i === current ? 'var(--volt-400)' : 'var(--ink-600)');
     }
@@ -509,7 +503,6 @@ async function loadSoldBuilds(config) {
     carousel.querySelector('.ge-sold-prev').addEventListener('click', () => goTo(current - 1));
     carousel.querySelector('.ge-sold-next').addEventListener('click', () => goTo(current + 1));
 
-    // Touch / swipe
     let touchStartX = 0;
     track.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
     track.addEventListener('touchend', e => {
@@ -517,7 +510,6 @@ async function loadSoldBuilds(config) {
       if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
     });
 
-    // Thumbnail switching within sold cards
     track.addEventListener('click', function(e) {
       const btn = e.target.closest('.ge-sold-thumb-btn');
       if (!btn) return;
