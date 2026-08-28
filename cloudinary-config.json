@@ -32,14 +32,12 @@
       "m2": {
         "tag": "PC2", "title": "Custom PC Workstation 02", "price": "$900",
         "specs": {
-          "CPU": "AMD Ryzen 5 5600X",
-          "GPU": "AMD RX 6600 XT",
-          "RAM": "16 GB DDR4 3600 MHz",
-          "Storage": "1 TB NVMe SSD",
-          "Motherboard": "B550 ATX",
-          "Cooling": "240 mm AIO",
-          "Case": "Mid-Tower ATX",
-          "OS": "Windows 11 Home"
+          "CPU": "AMD Ryzen 5 3600X (6C / 12T)",
+          "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB OC",
+          "RAM": "16 GB DDR4",
+          "Storage": "1 TB High-Speed SSD",
+          "Motherboard": "MSI B450 TOMAHAWK",
+          "OS": "Windows 11 (Fresh Install)"
         }
       },
       "m3": {
