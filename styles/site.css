@@ -103,8 +103,6 @@ img{max-width:100%;}
   display: flex;
   gap: 24px;
   transition: transform .42s cubic-bezier(.4,0,.2,1);
-  /* Each card in the track occupies exactly the card width + gap */
-  --ge-sold-card-w: min(560px, 90vw);
 }
 .ge-sold-card {
   flex: 0 0 var(--ge-sold-card-w);
@@ -142,6 +140,7 @@ img{max-width:100%;}
 .ge-sold-dot { transition: background .2s, transform .15s; }
 .ge-sold-dot:hover { transform: scale(1.3); }
 
+/* ---- Placeholder frames (replace the fillable image-slots) ----
    On-brand faceted dark frame with an icon + mono caption. Swap
    for a real <img> when product/workspace photos are available. */
 .ge-slot{
