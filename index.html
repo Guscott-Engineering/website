@@ -11,18 +11,17 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-<!-- Design-system tokens (copied verbatim from the Guscott Engineering design system) -->
+<!-- Fonts — preconnect reduces latency -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Design-system tokens + components -->
 <link rel="stylesheet" href="styles/tokens/colors.css">
 <link rel="stylesheet" href="styles/tokens/typography.css">
 <link rel="stylesheet" href="styles/tokens/spacing.css">
 <link rel="stylesheet" href="styles/tokens/radii.css">
-<link rel="stylesheet" href="styles/tokens/geometry.css">
 <link rel="stylesheet" href="styles/tokens/elevation.css">
-<!-- Components rebuilt from the design system + page layout -->
 <link rel="stylesheet" href="styles/components.css">
 <link rel="stylesheet" href="styles/site.css">
-
-<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -47,7 +46,7 @@
 
   <!-- ============ HERO ============ -->
   <section data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-25);overflow:hidden;">
-    <div style="position:absolute;inset:0;background:url(assets/converging-fields.svg) center/cover no-repeat;opacity:.45;pointer-events:none;"></div>
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 18px);pointer-events:none;"></div>
     <div style="position:absolute;width:640px;height:640px;right:-180px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
     <div style="position:relative;max-width:1100px;margin:0 auto;padding:136px 24px 94px;">
       <div class="ge-hero-grid">
@@ -141,17 +140,17 @@
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3vw,36px);color:var(--ink-900);margin:0 0 34px;letter-spacing:.005em;">Straightforward, local, backed</h2>
       <div class="ge-trust-grid">
         <div class="ge-card ge-card--pad">
-          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="shield-check"></i></div>
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Warranty</div>
           <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Something not right? Bring it back and we'll figure it out.</p>
         </div>
         <div class="ge-card ge-card--pad">
-          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="wallet"></i></div>
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Payment</div>
           <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Pay by Zelle, Cash App, or cash. Whatever's easiest for you.</p>
         </div>
         <div class="ge-card ge-card--pad">
-          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="map-pin"></i></div>
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Local pickup</div>
           <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Local to Atlanta, GA — built for local pickup, set up in person.</p>
         </div>
@@ -161,7 +160,7 @@
 
   <!-- ============ CONTACT ============ -->
   <section id="contact" data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-25);overflow:hidden;scroll-margin-top:72px;">
-    <div style="position:absolute;inset:0;background:url(assets/converging-fields.svg) center/cover no-repeat;opacity:.32;pointer-events:none;"></div>
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 18px);pointer-events:none;"></div>
     <div style="position:absolute;width:560px;height:560px;right:-160px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
     <div style="position:relative;max-width:760px;margin:0 auto;padding:92px 24px;text-align:center;">
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt-400);margin-bottom:16px;">Get in touch</div>
@@ -459,9 +458,6 @@ function updateHeaderTone() {
 
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
-  // Init Lucide icons
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-
   // Adaptive header on scroll
   window.addEventListener('scroll', updateHeaderTone, { passive: true });
   updateHeaderTone();
