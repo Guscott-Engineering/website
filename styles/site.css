@@ -200,7 +200,6 @@ img{max-width:100%;}
 .ge-sold-dot:hover { transform: scale(1.3); }
 
 @media (prefers-reduced-motion: reduce) {
-  html:focus-within{scroll-behavior:auto;}
   .ge-fade-enter,
   .ge-machine-main,
   .ge-portfolio-slide,
