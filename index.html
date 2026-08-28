@@ -11,17 +11,18 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-<!-- Fonts — preconnect reduces latency -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Design-system tokens + components -->
+<!-- Design-system tokens (copied verbatim from the Guscott Engineering design system) -->
 <link rel="stylesheet" href="styles/tokens/colors.css">
 <link rel="stylesheet" href="styles/tokens/typography.css">
 <link rel="stylesheet" href="styles/tokens/spacing.css">
 <link rel="stylesheet" href="styles/tokens/radii.css">
+<link rel="stylesheet" href="styles/tokens/geometry.css">
 <link rel="stylesheet" href="styles/tokens/elevation.css">
+<!-- Components rebuilt from the design system + page layout -->
 <link rel="stylesheet" href="styles/components.css">
 <link rel="stylesheet" href="styles/site.css">
+
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -46,7 +47,7 @@
 
   <!-- ============ HERO ============ -->
   <section data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-25);overflow:hidden;">
-    <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 18px);pointer-events:none;"></div>
+    <div style="position:absolute;inset:0;background:url(assets/converging-fields.svg) center/cover no-repeat;opacity:.45;pointer-events:none;"></div>
     <div style="position:absolute;width:640px;height:640px;right:-180px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
     <div style="position:relative;max-width:1100px;margin:0 auto;padding:136px 24px 94px;">
       <div class="ge-hero-grid">
@@ -140,17 +141,17 @@
       <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3vw,36px);color:var(--ink-900);margin:0 0 34px;letter-spacing:.005em;">Straightforward, local, backed</h2>
       <div class="ge-trust-grid">
         <div class="ge-card ge-card--pad">
-          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="shield-check"></i></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Warranty</div>
           <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Something not right? Bring it back and we'll figure it out.</p>
         </div>
         <div class="ge-card ge-card--pad">
-          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="wallet"></i></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Payment</div>
           <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Pay by Zelle, Cash App, or cash. Whatever's easiest for you.</p>
         </div>
         <div class="ge-card ge-card--pad">
-          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="ge-lico" style="font-size:24px;color:var(--volt-600);margin-bottom:14px;"><i data-lucide="map-pin"></i></div>
           <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Local pickup</div>
           <p style="font-size:15px;line-height:1.6;color:var(--text-body);margin:0;">Local to Atlanta, GA — built for local pickup, set up in person.</p>
         </div>
@@ -160,7 +161,7 @@
 
   <!-- ============ CONTACT ============ -->
   <section id="contact" data-tone="dark" style="position:relative;background:var(--ink-900);color:var(--ink-25);overflow:hidden;scroll-margin-top:72px;">
-    <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 18px);pointer-events:none;"></div>
+    <div style="position:absolute;inset:0;background:url(assets/converging-fields.svg) center/cover no-repeat;opacity:.32;pointer-events:none;"></div>
     <div style="position:absolute;width:560px;height:560px;right:-160px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
     <div style="position:relative;max-width:760px;margin:0 auto;padding:92px 24px;text-align:center;">
       <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt-400);margin-bottom:16px;">Get in touch</div>
@@ -206,9 +207,10 @@
     <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Specs</div>
     <h3 id="ge-modal-title" style="font-family:var(--font-display);font-weight:700;font-size:22px;color:#fff;margin:0 0 6px;"></h3>
     <p id="ge-modal-price" style="font-size:20px;font-weight:700;color:var(--volt-400);margin:0 0 24px;font-family:var(--font-mono);"></p>
-    <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:24px;">
+    <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:12px;">
       <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
     </div>
+    <div id="ge-modal-thumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:24px;"></div>
     <div id="ge-modal-specs" class="ge-spec-list"></div>
     <div style="margin-top:28px;text-align:center;">
       <a class="ge-btn ge-btn--primary" href="mailto:Guscottengineering@gmail.com" id="ge-modal-cta">Email Ayden about this build</a>
@@ -286,8 +288,8 @@ async function loadMachines(config) {
       hasAny = true;
       const mainImg = images[0];
 
-      // Store specs for the modal
-      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null };
+      // Store specs and full images array for the modal
+      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
@@ -299,8 +301,8 @@ async function loadMachines(config) {
       container.insertAdjacentHTML('beforeend', `
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
-            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;border-radius:var(--radius-md);overflow:hidden;" onclick="openMachineModal('${machine.id}')">
-              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:contain;display:block;">
+            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
+              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
             </div>
             <div style="position:absolute;top:12px;left:12px;">
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
@@ -416,13 +418,37 @@ function openMachineModal(machineId) {
   const modalImg = document.getElementById('ge-modal-img');
   const imgWrap = document.getElementById('ge-modal-img-wrap');
   const mainEl = document.getElementById(`${machineId}-main`);
-  if (modalImg && mainEl) {
-    modalImg.src = mainEl.src;
+  const activeUrl = mainEl ? mainEl.src : (data.images && data.images.length ? data.images[0].secure_url : '');
+  if (modalImg && activeUrl) {
+    modalImg.src = activeUrl;
     modalImg.alt = data.title;
     imgWrap.style.display = 'block';
   } else if (imgWrap) {
     imgWrap.style.display = 'none';
   }
+
+  const thumbsWrap = document.getElementById('ge-modal-thumbs');
+  if (thumbsWrap && data.images && data.images.length > 1) {
+    thumbsWrap.innerHTML = data.images.map((img, idx) => {
+      const isActive = img.secure_url === activeUrl;
+      return `<button class="ge-modal-thumb-btn" data-src="${img.secure_url}"
+        style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${isActive ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
+        <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${data.title} photo ${idx + 1}">
+      </button>`;
+    }).join('');
+    thumbsWrap.style.display = 'flex';
+    thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        modalImg.src = this.getAttribute('data-src');
+        thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(b => b.style.borderColor = 'transparent');
+        this.style.borderColor = '#00ffcc';
+      });
+    });
+  } else if (thumbsWrap) {
+    thumbsWrap.innerHTML = '';
+    thumbsWrap.style.display = 'none';
+  }
+
   const specList = document.getElementById('ge-modal-specs');
   specList.innerHTML = data.specs ? Object.entries(data.specs).map(([k, v]) => `
     <div class="ge-spec ge-spec--dark">
@@ -458,6 +484,9 @@ function updateHeaderTone() {
 
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
+  // Init Lucide icons
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
   // Adaptive header on scroll
   window.addEventListener('scroll', updateHeaderTone, { passive: true });
   updateHeaderTone();
