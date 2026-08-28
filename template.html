@@ -72,6 +72,9 @@
 // ===== IMAGE LOADING FROM cloudinary-config.json =====
 
 let _config = null;
+let _activeSmoothScroll = 0;
+let _headerToneQueued = false;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 async function loadConfig() {
   if (_config) return _config;
@@ -111,6 +114,38 @@ async function fetchCloudinaryImages(cloudName, tag) {
   }
 }
 
+function setImageHints(el, options = {}) {
+  if (!el) return;
+  el.decoding = 'async';
+  if (options.loading) el.loading = options.loading;
+  if (options.fetchPriority) el.fetchPriority = options.fetchPriority;
+  if (options.sizes) el.sizes = options.sizes;
+}
+
+function swapImageSource(imgEl, nextSrc) {
+  if (!imgEl || !nextSrc) return;
+  const currentSrc = imgEl.getAttribute('src') || '';
+  if (new URL(currentSrc, window.location.href).href === new URL(nextSrc, window.location.href).href) return;
+  imgEl.dataset.pendingSrc = nextSrc;
+  imgEl.classList.add('ge-media-swapping');
+
+  const preloader = new Image();
+  preloader.decoding = 'async';
+  preloader.onload = () => {
+    if (imgEl.dataset.pendingSrc !== nextSrc) return;
+    imgEl.src = nextSrc;
+    requestAnimationFrame(() => {
+      if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
+    });
+  };
+  preloader.onerror = () => {
+    if (imgEl.dataset.pendingSrc !== nextSrc) return;
+    imgEl.src = nextSrc;
+    imgEl.classList.remove('ge-media-swapping');
+  };
+  preloader.src = nextSrc;
+}
+
 async function injectStaticImages(config) {
   const allSingleImageKeys = { ...config.images.hero, ...config.images.about };
   for (const [key, entry] of Object.entries(allSingleImageKeys)) {
@@ -119,6 +154,10 @@ async function injectStaticImages(config) {
     const images = await fetchCloudinaryImages(config.cloudName, entry.tag);
     const src = images.length > 0 ? images[0].secure_url : entry.fallback;
     els.forEach(el => {
+      setImageHints(el, {
+        loading: key === 'hero-main' ? 'eager' : 'lazy',
+        fetchPriority: key === 'hero-main' ? 'high' : 'auto',
+      });
       el.src = src;
       if (entry.alt && !el.getAttribute('alt')) el.alt = entry.alt;
     });
@@ -131,9 +170,14 @@ async function loadMachines(config) {
     if (!container) return;
     const machines = Object.entries(config.images.machines).map(([id, m]) => ({ id, ...m }));
     let hasAny = false;
+    const machineDecks = await Promise.all(
+      machines.map(async machine => ({
+        machine,
+        images: await fetchCloudinaryImages(config.cloudName, machine.tag),
+      }))
+    );
 
-    for (const machine of machines) {
-      const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
+    for (const { machine, images } of machineDecks) {
       if (images.length === 0) continue;
       hasAny = true;
       const mainImg = images[0];
@@ -144,7 +188,7 @@ async function loadMachines(config) {
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
 
@@ -152,7 +196,7 @@ async function loadMachines(config) {
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
             <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
             </div>
             <div style="position:absolute;top:12px;left:12px;">
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
@@ -172,7 +216,7 @@ async function loadMachines(config) {
         btn.addEventListener('click', function() {
           const idx = parseInt(this.getAttribute('data-idx'));
           const mainEl = document.getElementById(`${machine.id}-main`);
-          if (mainEl && images[idx]) mainEl.src = images[idx].secure_url;
+          if (mainEl && images[idx]) swapImageSource(mainEl, images[idx].secure_url);
           document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
             b.style.borderColor = 'transparent';
           });
@@ -204,10 +248,9 @@ async function loadPortfolio(config) {
     let current = 0;
 
     const slidesHtml = images.map((img, i) => `
-      <div class="ge-portfolio-slide" data-slide="${i}"
-        style="display:${i === 0 ? 'block' : 'none'};width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--ink-1000);">
-        <img src="${img.secure_url}" alt="Portfolio build ${i + 1}"
-          style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s;" loading="lazy">
+      <div class="ge-portfolio-slide${i === 0 ? ' is-active' : ''}" data-slide="${i}" aria-hidden="${i === 0 ? 'false' : 'true'}">
+        <img class="ge-cloudinary-image" src="${img.secure_url}" alt="Portfolio build ${i + 1}"
+          decoding="async" loading="${i === 0 ? 'eager' : 'lazy'}">
       </div>
     `).join('');
 
@@ -220,7 +263,7 @@ async function loadPortfolio(config) {
 
     carousel.innerHTML = `
       <div style="position:relative;user-select:none;">
-        ${slidesHtml}
+        <div class="ge-portfolio-stage">${slidesHtml}</div>
         ${images.length > 1 ? `
           <button class="ge-port-prev" aria-label="Previous" style="${arrowStyle}left:-18px;">&#8249;</button>
           <button class="ge-port-next" aria-label="Next"     style="${arrowStyle}right:-18px;">&#8250;</button>
@@ -233,10 +276,12 @@ async function loadPortfolio(config) {
     const dots   = carousel.querySelectorAll('.ge-port-dot');
 
     function goTo(idx) {
-      slides[current].style.display = 'none';
+      slides[current].classList.remove('is-active');
+      slides[current].setAttribute('aria-hidden', 'true');
       dots[current] && (dots[current].style.background = 'var(--ink-600)');
       current = (idx + images.length) % images.length;
-      slides[current].style.display = 'block';
+      slides[current].classList.add('is-active');
+      slides[current].setAttribute('aria-hidden', 'false');
       dots[current] && (dots[current].style.background = 'var(--volt-400)');
     }
 
@@ -288,7 +333,7 @@ async function loadSoldBuilds(config) {
       const thumbsHtml = images.map((img, ti) => `
         <button class="ge-thumb-btn ge-sold-thumb-btn" data-sold-machine="${machine.id}" data-idx="${ti}"
           style="flex:none;width:48px;height:48px;padding:0;border:2px solid ${ti === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${ti + 1}">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${ti + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
 
@@ -298,7 +343,7 @@ async function loadSoldBuilds(config) {
       card.innerHTML = `
         <div style="position:relative;">
           <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-            <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
           </div>
           <div style="position:absolute;top:12px;left:12px;">
             <span class="ge-badge ge-badge--solid" style="background:var(--ink-700);color:var(--ink-300);">
@@ -356,7 +401,7 @@ async function loadSoldBuilds(config) {
       const deck = decks.find(d => d.machine.id === machId);
       if (!deck) return;
       const mainEl = document.getElementById(`${machId}-main`);
-      if (mainEl && deck.images[imgIdx]) mainEl.src = deck.images[imgIdx].secure_url;
+      if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
       track.querySelectorAll(`[data-sold-machine="${machId}"]`).forEach(b => b.style.borderColor = 'transparent');
       btn.style.borderColor = '#00ffcc';
     });
@@ -377,11 +422,12 @@ function openMachineModal(machineId) {
   document.getElementById('ge-modal-title').textContent = data.title;
   document.getElementById('ge-modal-price').textContent = data.price;
   const modalImg = document.getElementById('ge-modal-img');
+  setImageHints(modalImg, { loading: 'eager', fetchPriority: 'high' });
   const imgWrap = document.getElementById('ge-modal-img-wrap');
   const mainEl = document.getElementById(`${machineId}-main`);
   const activeUrl = mainEl ? mainEl.src : (data.images && data.images.length ? data.images[0].secure_url : '');
   if (modalImg && activeUrl) {
-    modalImg.src = activeUrl;
+    swapImageSource(modalImg, activeUrl);
     modalImg.alt = data.title;
     imgWrap.style.display = 'block';
   } else if (imgWrap) {
@@ -394,13 +440,13 @@ function openMachineModal(machineId) {
       const isActive = img.secure_url === activeUrl;
       return `<button class="ge-modal-thumb-btn" data-src="${img.secure_url}"
         style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${isActive ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-        <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${data.title} photo ${idx + 1}">
+        <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${data.title} photo ${idx + 1}" decoding="async" loading="lazy">
       </button>`;
     }).join('');
     thumbsWrap.style.display = 'flex';
     thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        modalImg.src = this.getAttribute('data-src');
+        swapImageSource(modalImg, this.getAttribute('data-src'));
         thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(b => b.style.borderColor = 'transparent');
         this.style.borderColor = '#00ffcc';
       });
@@ -443,14 +489,81 @@ function updateHeaderTone() {
   header.classList.toggle('ge-header--light', tone === 'light');
 }
 
+function queueHeaderToneUpdate() {
+  if (_headerToneQueued) return;
+  _headerToneQueued = true;
+  requestAnimationFrame(() => {
+    _headerToneQueued = false;
+    updateHeaderTone();
+  });
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function smoothScrollToSection(target) {
+  if (!target) return;
+  const header = document.querySelector('.ge-header');
+  const headerOffset = header ? header.getBoundingClientRect().height : 0;
+  const targetY = Math.max(0, target.getBoundingClientRect().top + window.pageYOffset - headerOffset);
+
+  if (prefersReducedMotion.matches) {
+    window.scrollTo(0, targetY);
+    queueHeaderToneUpdate();
+    return;
+  }
+
+  cancelAnimationFrame(_activeSmoothScroll);
+  const startY = window.pageYOffset;
+  const distance = targetY - startY;
+  const duration = Math.min(900, Math.max(500, Math.abs(distance) * 0.45));
+  let startTime = 0;
+
+  const step = (timestamp) => {
+    if (!startTime) startTime = timestamp;
+    const progress = Math.min((timestamp - startTime) / duration, 1);
+    const eased = easeOutCubic(progress);
+    window.scrollTo(0, startY + distance * eased);
+    queueHeaderToneUpdate();
+    if (progress < 1) {
+      _activeSmoothScroll = requestAnimationFrame(step);
+    }
+  };
+
+  _activeSmoothScroll = requestAnimationFrame(step);
+}
+
+function initSmoothSectionLinks() {
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    if (link.target && link.target !== '_self') return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
+
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+    const target = document.querySelector(href);
+    if (!target) return;
+
+    e.preventDefault();
+    if (window.location.hash !== href) {
+      history.replaceState(null, '', href);
+    }
+    smoothScrollToSection(target);
+  });
+}
+
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
   // Init Lucide icons
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   // Adaptive header on scroll
-  window.addEventListener('scroll', updateHeaderTone, { passive: true });
-  updateHeaderTone();
+  window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
+  window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
+  initSmoothSectionLinks();
+  queueHeaderToneUpdate();
 
   // Modal close handlers
   document.getElementById('ge-modal-close')?.addEventListener('click', closeMachineModal);

@@ -7,10 +7,26 @@
    ============================================================ */
 
 *{box-sizing:border-box;}
-body{margin:0;background:var(--paper);}
+html{scroll-padding-top:72px;}
+body{margin:0;background:var(--paper);overflow-x:hidden;}
 img{max-width:100%;}
 
 @keyframes geFade{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+.ge-fade-enter{
+  animation:geFade .6s var(--ease-mechanical) both;
+  will-change:opacity,transform;
+  transform:translateZ(0);
+}
+.ge-fade-enter--delay{animation-delay:.12s;}
+.ge-deferred-section{
+  content-visibility:auto;
+  contain-intrinsic-size:1px 960px;
+}
+.ge-cloudinary-image{
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
 
 /* ---- Header nav ---- */
 .ge-nav{display:none;}
@@ -56,9 +72,22 @@ img{max-width:100%;}
 .ge-portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;}
 
 /* ---- Machine card product image — hover zoom ---- */
-.ge-machine-img-wrap{overflow:hidden;}
+.ge-machine-img-wrap{overflow:hidden;transform:translateZ(0);}
 .ge-machine-img-wrap img{transition:transform .4s var(--ease-pop,cubic-bezier(.34,1.3,.64,1));}
 .ge-machine-img-wrap:hover img{transform:scale(1.06);}
+.ge-machine-main{
+  transition:opacity .28s ease,transform .28s cubic-bezier(.4,0,.2,1);
+  will-change:opacity,transform;
+}
+.ge-machine-main.ge-media-swapping{
+  opacity:.72;
+  transform:translateY(6px);
+}
+.ge-thumb-btn,.ge-modal-thumb-btn{
+  transition:transform .2s var(--ease-mechanical),box-shadow .2s var(--ease-mechanical);
+  will-change:transform;
+}
+.ge-thumb-btn:hover,.ge-modal-thumb-btn:hover{transform:translateY(-1px);}
 
 /* ---- Portfolio catalog carousel ---- */
 .ge-catalog-wrap{position:relative;}
@@ -73,6 +102,34 @@ img{max-width:100%;}
 .ge-port-prev:hover,.ge-port-next:hover{background:rgba(30,30,30,.9) !important;transform:translateY(-50%) scale(1.08) !important;}
 .ge-port-dot{transition:background .2s,transform .15s;}
 .ge-port-dot:hover{transform:scale(1.3);}
+.ge-portfolio-stage{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--ink-1000);
+}
+.ge-portfolio-slide{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity .8s cubic-bezier(.4,0,.2,1),transform .8s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+  will-change:opacity,transform;
+}
+.ge-portfolio-slide.is-active{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.ge-portfolio-slide img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
 
 /* ---- PC detail modal ---- */
 #ge-pc-modal{transition:opacity .2s;}
@@ -103,6 +160,8 @@ img{max-width:100%;}
   display: flex;
   gap: 24px;
   transition: transform .42s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+  transform: translate3d(0,0,0);
 }
 .ge-sold-card {
   flex: 0 0 var(--ge-sold-card-w);
@@ -139,6 +198,25 @@ img{max-width:100%;}
 .ge-sold-dots { display: flex; gap: 8px; }
 .ge-sold-dot { transition: background .2s, transform .15s; }
 .ge-sold-dot:hover { transform: scale(1.3); }
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within{scroll-behavior:auto;}
+  .ge-fade-enter,
+  .ge-machine-main,
+  .ge-portfolio-slide,
+  .ge-sold-track,
+  .ge-machine-img-wrap img,
+  .ge-thumb-btn,
+  .ge-modal-thumb-btn,
+  .ge-port-prev,
+  .ge-port-next,
+  .ge-sold-prev,
+  .ge-sold-next{
+    animation:none !important;
+    transition:none !important;
+    transform:none !important;
+  }
+}
 
 /* ---- Placeholder frames (replace the fillable image-slots) ----
    On-brand faceted dark frame with an icon + mono caption. Swap
