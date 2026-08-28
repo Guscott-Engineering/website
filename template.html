@@ -57,9 +57,10 @@
     <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Specs</div>
     <h3 id="ge-modal-title" style="font-family:var(--font-display);font-weight:700;font-size:22px;color:#fff;margin:0 0 6px;"></h3>
     <p id="ge-modal-price" style="font-size:20px;font-weight:700;color:var(--volt-400);margin:0 0 24px;font-family:var(--font-mono);"></p>
-    <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:24px;">
-      <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+    <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:12px;">
+      <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
     </div>
+    <div id="ge-modal-thumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:24px;"></div>
     <div id="ge-modal-specs" class="ge-spec-list"></div>
     <div style="margin-top:28px;text-align:center;">
       <a class="ge-btn ge-btn--primary" href="mailto:Guscottengineering@gmail.com" id="ge-modal-cta">Email Ayden about this build</a>
@@ -137,8 +138,8 @@ async function loadMachines(config) {
       hasAny = true;
       const mainImg = images[0];
 
-      // Store specs for the modal
-      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null };
+      // Store specs and full images array for the modal
+      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
@@ -267,13 +268,37 @@ function openMachineModal(machineId) {
   const modalImg = document.getElementById('ge-modal-img');
   const imgWrap = document.getElementById('ge-modal-img-wrap');
   const mainEl = document.getElementById(`${machineId}-main`);
-  if (modalImg && mainEl) {
-    modalImg.src = mainEl.src;
+  const activeUrl = mainEl ? mainEl.src : (data.images && data.images.length ? data.images[0].secure_url : '');
+  if (modalImg && activeUrl) {
+    modalImg.src = activeUrl;
     modalImg.alt = data.title;
     imgWrap.style.display = 'block';
   } else if (imgWrap) {
     imgWrap.style.display = 'none';
   }
+
+  const thumbsWrap = document.getElementById('ge-modal-thumbs');
+  if (thumbsWrap && data.images && data.images.length > 1) {
+    thumbsWrap.innerHTML = data.images.map((img, idx) => {
+      const isActive = img.secure_url === activeUrl;
+      return `<button class="ge-modal-thumb-btn" data-src="${img.secure_url}"
+        style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${isActive ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
+        <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${data.title} photo ${idx + 1}">
+      </button>`;
+    }).join('');
+    thumbsWrap.style.display = 'flex';
+    thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        modalImg.src = this.getAttribute('data-src');
+        thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(b => b.style.borderColor = 'transparent');
+        this.style.borderColor = '#00ffcc';
+      });
+    });
+  } else if (thumbsWrap) {
+    thumbsWrap.innerHTML = '';
+    thumbsWrap.style.display = 'none';
+  }
+
   const specList = document.getElementById('ge-modal-specs');
   specList.innerHTML = data.specs ? Object.entries(data.specs).map(([k, v]) => `
     <div class="ge-spec ge-spec--dark">
