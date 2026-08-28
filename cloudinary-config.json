@@ -19,14 +19,14 @@
       "m1": {
         "tag": "PC1", "title": "Custom PC Workstation 01", "price": "$800",
         "specs": {
-          "CPU": "AMD Ryzen 5 5600X",
-          "GPU": "NVIDIA GTX 1660 Super",
-          "RAM": "16 GB DDR4 3200 MHz",
-          "Storage": "500 GB NVMe SSD",
-          "Motherboard": "B550 ATX",
-          "Cooling": "120 mm AIO",
-          "Case": "Mid-Tower ATX",
-          "OS": "Windows 11 Home"
+          "CPU": "AMD Ryzen 5 5600X (6C / 12T)",
+          "GPU": "XFX RX 6700 10GB Speedster SWFT 309",
+          "RAM": "32 GB G.SKILL TridentZ RGB DDR4 3600 MHz",
+          "Storage": "500 GB SSD + 1 TB HDD",
+          "Motherboard": "ASUS ROG Strix B550-F WiFi II",
+          "Cooling": "NZXT Kraken X53 240 mm AIO",
+          "Case": "Lian Li LANCOOL II MESH Mid-Tower",
+          "PSU": "850 W 80+ Gold"
         }
       },
       "m2": {
