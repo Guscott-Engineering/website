@@ -528,6 +528,8 @@ function smoothScrollToSection(target) {
     queueHeaderToneUpdate();
     if (progress < 1) {
       _activeSmoothScroll = requestAnimationFrame(step);
+    } else {
+      _activeSmoothScroll = 0;
     }
   };
 
