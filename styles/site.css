@@ -53,7 +53,26 @@ img{max-width:100%;}
 
 .ge-avail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;}
 .ge-trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
-.ge-portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+.ge-portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;}
+
+/* ---- Machine card product image — hover zoom ---- */
+.ge-machine-img-wrap{overflow:hidden;}
+.ge-machine-img-wrap img{transition:transform .4s var(--ease-pop,cubic-bezier(.34,1.3,.64,1));}
+.ge-machine-img-wrap:hover img{transform:scale(1.06);}
+
+/* ---- Portfolio catalog carousel ---- */
+.ge-catalog-wrap{position:relative;}
+.ge-catalog-slide{width:100%;}
+.ge-catalog-item{overflow:hidden;}
+.ge-catalog-item:hover img{transform:scale(1.04);}
+.ge-catalog-prev,.ge-catalog-next{transition:background .2s,transform .15s;}
+.ge-catalog-prev:hover,.ge-catalog-next:hover{background:var(--ink-700) !important;transform:translateY(-50%) scale(1.08) !important;}
+.ge-catalog-dot{transition:background .2s,transform .15s;}
+.ge-catalog-dot:hover{transform:scale(1.3);}
+
+/* ---- PC detail modal ---- */
+#ge-pc-modal{transition:opacity .2s;}
+.ge-spec-list{display:flex;flex-direction:column;}
 .ge-contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;}
 
 .ge-break-grid{display:grid;grid-template-columns:1fr;gap:30px;align-items:start;}
