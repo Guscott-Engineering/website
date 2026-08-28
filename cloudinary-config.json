@@ -17,42 +17,39 @@
     },
     "machines": {
       "m1": {
-        "tag": "PC1", "title": "Custom PC Workstation 01", "price": "$800",
+        "tag": "PC1", "title": "Custom PC Workstation 01", "price": "$900",
         "specs": {
-          "CPU": "AMD Ryzen 5 5600X",
-          "GPU": "NVIDIA GTX 1660 Super",
-          "RAM": "16 GB DDR4 3200 MHz",
-          "Storage": "500 GB NVMe SSD",
-          "Motherboard": "B550 ATX",
-          "Cooling": "120 mm AIO",
-          "Case": "Mid-Tower ATX",
-          "OS": "Windows 11 Home"
+          "CPU": "AMD Ryzen 5 5600X (6C / 12T)",
+          "GPU": "XFX RX 6700 10GB Speedster SWFT 309",
+          "RAM": "32 GB G.SKILL TridentZ RGB DDR4 3600 MHz",
+          "Storage": "500 GB SSD + 1 TB HDD",
+          "Motherboard": "ASUS ROG Strix B550-F WiFi II",
+          "Cooling": "NZXT Kraken X53 240 mm AIO",
+          "Case": "Lian Li LANCOOL II MESH Mid-Tower",
+          "PSU": "850 W 80+ Gold"
         }
       },
       "m2": {
-        "tag": "PC2", "title": "Custom PC Workstation 02", "price": "$900",
+        "tag": "PC2", "title": "Custom PC Workstation 02", "price": "$750",
         "specs": {
-          "CPU": "AMD Ryzen 5 5600X",
-          "GPU": "AMD RX 6600 XT",
-          "RAM": "16 GB DDR4 3600 MHz",
-          "Storage": "1 TB NVMe SSD",
-          "Motherboard": "B550 ATX",
-          "Cooling": "240 mm AIO",
-          "Case": "Mid-Tower ATX",
-          "OS": "Windows 11 Home"
+          "CPU": "AMD Ryzen 5 3600X (6C / 12T)",
+          "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB OC",
+          "RAM": "16 GB DDR4",
+          "Storage": "1 TB High-Speed SSD",
+          "Motherboard": "MSI B450 TOMAHAWK",
+          "OS": "Windows 11 (Fresh Install)"
         }
       },
       "m3": {
-        "tag": "PC3", "title": "Custom PC Workstation 03", "price": "$1100",
+        "tag": "PC3", "title": "Custom PC Workstation 03", "price": "$825",
         "specs": {
-          "CPU": "Intel Core i5-12400F",
-          "GPU": "NVIDIA RTX 3060",
+          "CPU": "AMD Ryzen 7 2700X (8C / 16T)",
+          "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB FE",
           "RAM": "32 GB DDR4 3200 MHz",
-          "Storage": "1 TB NVMe SSD",
-          "Motherboard": "B660 ATX",
-          "Cooling": "240 mm AIO",
-          "Case": "Full-Tower ATX",
-          "OS": "Windows 11 Home"
+          "Storage": "500 GB SSD + 1 TB HDD",
+          "Motherboard": "GIGABYTE B450 AORUS PRO WIFI",
+          "PSU": "Corsair RM850e 850 W 80+ Gold Modular",
+          "Case": "Montech ATX Mid-Tower"
         }
       },
       "m4": {
