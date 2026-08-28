@@ -208,7 +208,7 @@
     <h3 id="ge-modal-title" style="font-family:var(--font-display);font-weight:700;font-size:22px;color:#fff;margin:0 0 6px;"></h3>
     <p id="ge-modal-price" style="font-size:20px;font-weight:700;color:var(--volt-400);margin:0 0 24px;font-family:var(--font-mono);"></p>
     <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:24px;">
-      <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
     </div>
     <div id="ge-modal-specs" class="ge-spec-list"></div>
     <div style="margin-top:28px;text-align:center;">
@@ -300,8 +300,8 @@ async function loadMachines(config) {
       container.insertAdjacentHTML('beforeend', `
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
-            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;border-radius:var(--radius-md);overflow:hidden;" onclick="openMachineModal('${machine.id}')">
+              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:contain;display:block;">
             </div>
             <div style="position:absolute;top:12px;left:12px;">
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
