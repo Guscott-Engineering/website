@@ -69,6 +69,10 @@ img{max-width:100%;}
 .ge-catalog-prev:hover,.ge-catalog-next:hover{background:var(--ink-700) !important;transform:translateY(-50%) scale(1.08) !important;}
 .ge-catalog-dot{transition:background .2s,transform .15s;}
 .ge-catalog-dot:hover{transform:scale(1.3);}
+.ge-port-prev,.ge-port-next{transition:background .2s,transform .15s;}
+.ge-port-prev:hover,.ge-port-next:hover{background:rgba(30,30,30,.9) !important;transform:translateY(-50%) scale(1.08) !important;}
+.ge-port-dot{transition:background .2s,transform .15s;}
+.ge-port-dot:hover{transform:scale(1.3);}
 
 /* ---- PC detail modal ---- */
 #ge-pc-modal{transition:opacity .2s;}
