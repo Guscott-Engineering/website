@@ -754,7 +754,6 @@ function initSmoothSectionLinks() {
       return;
     }
     history.pushState(null, '', href);
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
     smoothScrollToSection(target);
   });
 }
@@ -767,6 +766,7 @@ function getTargetFromHash(hash) {
 }
 
 function handleHistoryNavigation() {
+  if (prefersReducedMotion.matches) return;
   const target = getTargetFromHash(window.location.hash);
   if (target) smoothScrollToSection(target);
 }
