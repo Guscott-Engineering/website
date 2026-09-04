@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guscott Engineering — Admin</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0c0f;--bg2:#12151a;--bg3:#1a1e25;--bg4:#242a33;
+    --volt:#ccff00;--volt-dim:#99cc00;--volt-bg:rgba(204,255,0,.08);
+    --text:#e4e6ea;--text2:#9ca3af;--text3:#6b7280;
+    --red:#ff4d4d;--red-bg:rgba(255,77,77,.1);
+    --border:#2a2f38;--radius:10px;
+    --mono:'SF Mono','Fira Code','Cascadia Code','Consolas',monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  html{font-size:15px}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+  a{color:var(--volt);text-decoration:none}
+
+  /* ── Toast ── */
+  #toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+  .toast{padding:14px 22px;border-radius:var(--radius);font-size:.88rem;font-family:var(--mono);
+    color:var(--bg);opacity:0;transform:translateX(40px);transition:all .35s ease;max-width:420px;
+    box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .toast.show{opacity:1;transform:translateX(0)}
+  .toast.success{background:var(--volt)}
+  .toast.error{background:var(--red);color:#fff}
+
+  /* ── Login ── */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .login-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:48px 40px;
+    max-width:460px;width:100%;text-align:center}
+  .login-box h1{font-family:var(--mono);font-size:1.6rem;color:var(--volt);margin-bottom:6px;letter-spacing:-.5px}
+  .login-box p{color:var(--text2);font-size:.88rem;margin-bottom:32px}
+  .login-box input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);
+    border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:.88rem;
+    outline:none;transition:border .2s}
+  .login-box input:focus{border-color:var(--volt)}
+  .login-box input::placeholder{color:var(--text3)}
+  .login-box button{margin-top:18px;width:100%;padding:14px;background:var(--volt);color:var(--bg);
+    border:none;border-radius:var(--radius);font-family:var(--mono);font-size:.95rem;font-weight:700;
+    cursor:pointer;transition:background .2s,transform .1s}
+  .login-box button:hover{background:var(--volt-dim)}
+  .login-box button:active{transform:scale(.98)}
+  .login-box button:disabled{opacity:.5;cursor:not-allowed}
+  .login-error{color:var(--red);font-size:.82rem;margin-top:14px;min-height:1.2em;font-family:var(--mono)}
+  .login-hint{color:var(--text3);font-size:.75rem;margin-top:22px;line-height:1.6}
+
+  /* ── Admin Shell ── */
+  #admin-screen{display:none;max-width:1280px;margin:0 auto;padding:24px 28px 60px}
+  .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+  .top-bar h1{font-family:var(--mono);font-size:1.35rem;color:var(--volt);letter-spacing:-.5px}
+  .top-bar-actions{display:flex;gap:10px;align-items:center}
+  .top-bar .repo-link{font-size:.78rem;color:var(--text3);font-family:var(--mono)}
+  .btn-sm{padding:8px 18px;border-radius:var(--radius);font-family:var(--mono);font-size:.78rem;
+    border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s}
+  .btn-sm:hover{border-color:var(--text2);color:var(--text)}
+  .btn-sm.danger{border-color:rgba(255,77,77,.3);color:var(--red)}
+  .btn-sm.danger:hover{border-color:var(--red);background:var(--red-bg)}
+
+  /* ── Columns ── */
+  .columns{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media(max-width:860px){.columns{grid-template-columns:1fr}}
+  .column{min-width:0}
+  .col-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .col-header h2{font-family:var(--mono);font-size:1rem;letter-spacing:-.3px}
+  .col-header .badge{font-family:var(--mono);font-size:.72rem;background:var(--bg3);color:var(--text2);
+    padding:3px 10px;border-radius:20px}
+  .col-available .col-header h2{color:var(--volt)}
+  .col-portfolio .col-header h2{color:var(--text2)}
+  .empty-state{color:var(--text3);font-size:.84rem;font-family:var(--mono);padding:28px;
+    text-align:center;border:1px dashed var(--border);border-radius:var(--radius)}
+
+  /* ── Machine Card ── */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:14px;transition:border-color .2s}
+  .card:hover{border-color:var(--bg4)}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .card-title{font-family:var(--mono);font-size:.95rem;font-weight:600;color:var(--text)}
+  .card-tag{font-family:var(--mono);font-size:.68rem;color:var(--volt);background:var(--volt-bg);
+    padding:3px 10px;border-radius:20px;white-space:nowrap}
+  .card-price{font-family:var(--mono);font-size:1.15rem;font-weight:700;color:var(--volt);margin-bottom:10px}
+  .card-specs{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:.8rem;margin-bottom:16px}
+  .spec-key{color:var(--text3);font-family:var(--mono);white-space:nowrap}
+  .spec-val{color:var(--text2)}
+  .card-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .card-btn{padding:8px 16px;border-radius:8px;font-family:var(--mono);font-size:.76rem;
+    border:none;cursor:pointer;transition:all .2s;font-weight:600}
+  .card-btn:disabled{opacity:.4;cursor:not-allowed}
+  .card-btn.sell{background:var(--volt);color:var(--bg)}
+  .card-btn.sell:hover:not(:disabled){background:var(--volt-dim)}
+  .card-btn.unsell{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+  .card-btn.unsell:hover:not(:disabled){border-color:var(--text3);color:var(--text)}
+  .card-btn.delete{background:transparent;color:var(--red);border:1px solid rgba(255,77,77,.25)}
+  .card-btn.delete:hover:not(:disabled){border-color:var(--red);background:var(--red-bg)}
+  .card.sold-card{opacity:.75}
+
+  /* ── Add Form ── */
+  .add-section{margin-top:36px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .add-toggle{width:100%;padding:16px 22px;background:var(--bg2);border:none;color:var(--text);
+    font-family:var(--mono);font-size:.92rem;cursor:pointer;text-align:left;display:flex;
+    align-items:center;gap:10px;transition:background .2s}
+  .add-toggle:hover{background:var(--bg3)}
+  .add-toggle .chevron{transition:transform .25s;color:var(--volt);font-size:.8rem}
+  .add-toggle.open .chevron{transform:rotate(90deg)}
+  .add-form{max-height:0;overflow:hidden;transition:max-height .4s ease;background:var(--bg2)}
+  .add-form.open{max-height:1200px}
+  .add-form-inner{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.add-form-inner{grid-template-columns:1fr}}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-group.full{grid-column:1/-1}
+  .form-group label{font-family:var(--mono);font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+  .form-group input{padding:11px 14px;background:var(--bg);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-size:.86rem;outline:none;transition:border .2s}
+  .form-group input:focus{border-color:var(--volt)}
+  .form-group input::placeholder{color:var(--text3)}
+  .add-submit{grid-column:1/-1;padding:14px;background:var(--volt);color:var(--bg);border:none;
+    border-radius:var(--radius);font-family:var(--mono);font-size:.9rem;font-weight:700;
+    cursor:pointer;transition:background .2s,transform .1s;margin-top:4px}
+  .add-submit:hover{background:var(--volt-dim)}
+  .add-submit:active{transform:scale(.98)}
+  .add-submit:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ── Confirm Dialog ── */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:flex;
+    align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  .overlay.show{opacity:1;pointer-events:all}
+  .dialog{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;
+    max-width:400px;width:90%;text-align:center}
+  .dialog h3{font-family:var(--mono);margin-bottom:8px;font-size:1rem}
+  .dialog p{color:var(--text2);font-size:.86rem;margin-bottom:24px}
+  .dialog-btns{display:flex;gap:10px;justify-content:center}
+  .dialog-btns button{padding:10px 24px;border-radius:8px;font-family:var(--mono);font-size:.82rem;
+    border:none;cursor:pointer;font-weight:600;transition:all .2s}
+  .dialog-btns .cancel-btn{background:var(--bg3);color:var(--text2)}
+  .dialog-btns .cancel-btn:hover{background:var(--bg4)}
+  .dialog-btns .confirm-btn{background:var(--red);color:#fff}
+  .dialog-btns .confirm-btn:hover{background:#e03e3e}
+
+  /* ── Spinner ── */
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--bg);
+    border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-overlay{position:fixed;inset:0;background:rgba(10,12,15,.8);z-index:998;
+    display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  .loading-overlay.show{opacity:1;pointer-events:all}
+  .loading-overlay .spinner-lg{width:36px;height:36px;border-width:3px;border-color:var(--volt);border-top-color:transparent}
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="spinner spinner-lg"></div>
+</div>
+
+<!-- Confirm Dialog -->
+<div id="confirm-overlay" class="overlay">
+  <div class="dialog">
+    <h3 id="confirm-title">Confirm</h3>
+    <p id="confirm-message">Are you sure?</p>
+    <div class="dialog-btns">
+      <button class="cancel-btn" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-btn" id="confirm-btn" onclick="">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Screen -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>⚡ Guscott Admin</h1>
+    <p>Machine listing manager</p>
+    <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    <div class="login-error" id="login-error"></div>
+    <button id="login-btn" onclick="handleLogin()">Authenticate</button>
+    <div class="login-hint">
+      Enter a GitHub PAT with <strong>repo</strong> scope for<br>
+      <code>Guscott-Engineering/website</code>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Screen -->
+<div id="admin-screen">
+  <div class="top-bar">
+    <h1>⚡ Guscott Admin</h1>
+    <div class="top-bar-actions">
+      <a class="repo-link" href="https://github.com/Guscott-Engineering/website" target="_blank" rel="noopener">Guscott-Engineering/website ↗</a>
+      <button class="btn-sm" onclick="refreshData()">↻ Refresh</button>
+      <button class="btn-sm danger" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="columns" id="columns-container">
+    <div class="column col-available">
+      <div class="col-header">
+        <h2>Available Machines</h2>
+        <span class="badge" id="available-count">0</span>
+      </div>
+      <div id="available-list"></div>
+    </div>
+    <div class="column col-portfolio">
+      <div class="col-header">
+        <h2>Portfolio (Sold)</h2>
+        <span class="badge" id="portfolio-count">0</span>
+      </div>
+      <div id="portfolio-list"></div>
+    </div>
+  </div>
+
+  <!-- Add Machine -->
+  <div class="add-section">
+    <button class="add-toggle" id="add-toggle" onclick="toggleAddForm()">
+      <span class="chevron">▶</span> Add New Machine
+    </button>
+    <div class="add-form" id="add-form">
+      <div class="add-form-inner">
+        <div class="form-group"><label>Title *</label><input id="f-title" placeholder="Custom PC Workstation 06"></div>
+        <div class="form-group"><label>Cloudinary Tag *</label><input id="f-tag" placeholder="PC6"></div>
+        <div class="form-group"><label>Price *</label><input id="f-price" placeholder="$1200"></div>
+        <div class="form-group"><label>CPU</label><input id="f-cpu" placeholder="AMD Ryzen 7 5800X"></div>
+        <div class="form-group"><label>GPU</label><input id="f-gpu" placeholder="NVIDIA RTX 3070"></div>
+        <div class="form-group"><label>RAM</label><input id="f-ram" placeholder="32 GB DDR4 3600 MHz"></div>
+        <div class="form-group"><label>Storage</label><input id="f-storage" placeholder="1 TB NVMe SSD"></div>
+        <div class="form-group"><label>Motherboard</label><input id="f-mobo" placeholder="B550 ATX"></div>
+        <div class="form-group"><label>Cooling</label><input id="f-cooling" placeholder="240mm AIO"></div>
+        <div class="form-group"><label>Case</label><input id="f-case" placeholder="Mid-Tower ATX"></div>
+        <div class="form-group"><label>PSU</label><input id="f-psu" placeholder="750W 80+ Gold"></div>
+        <div class="form-group"><label>OS</label><input id="f-os" placeholder="Windows 11 Pro"></div>
+        <button class="add-submit" id="add-btn" onclick="handleAddMachine()">+ Add Machine</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const REPO = 'Guscott-Engineering/website';
+const FILE_PATH = 'cloudinary-config.json';
+const API_BASE = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
+
+let config = null;
+let fileSha = null;
+let busy = false;
+
+/* ── Helpers ── */
+function getPAT() { return sessionStorage.getItem('gh_pat') || ''; }
+
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+}
+
+function setLoading(on) {
+  document.getElementById('loading-overlay').classList.toggle('show', on);
+  busy = on;
+}
+
+let confirmResolver = null;
+function openConfirm(title, message) {
+  return new Promise(resolve => {
+    confirmResolver = resolve;
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-btn').onclick = () => { closeConfirm(); resolve(true); };
+    document.getElementById('confirm-overlay').classList.add('show');
+  });
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('show');
+  if (confirmResolver) { confirmResolver(false); confirmResolver = null; }
+}
+
+/* ── API ── */
+async function fetchConfig(pat) {
+  const resp = await fetch(API_BASE, {
+    headers: { 'Authorization': `Bearer ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!resp.ok) throw new Error(`GitHub API ${resp.status}: ${resp.statusText}`);
+  const data = await resp.json();
+  fileSha = data.sha;
+  const decoded = atob(data.content.replace(/\n/g, ''));
+  config = JSON.parse(decoded);
+  return config;
+}
+
+async function saveConfig(commitMsg) {
+  const pat = getPAT();
+  // Re-fetch SHA to avoid conflicts
+  const freshResp = await fetch(API_BASE, {
+    headers: { 'Authorization': `Bearer ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!freshResp.ok) throw new Error(`Failed to fetch current SHA: ${freshResp.status}`);
+  const freshData = await freshResp.json();
+  fileSha = freshData.sha;
+
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2) + '\n')));
+  const resp = await fetch(API_BASE, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${pat}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: commitMsg,
+      content: encoded,
+      sha: fileSha
+    })
+  });
+  if (!resp.ok) {
+    const errBody = await resp.json().catch(() => ({}));
+    throw new Error(`Save failed (${resp.status}): ${errBody.message || resp.statusText}`);
+  }
+  const result = await resp.json();
+  fileSha = result.content.sha;
+  return result;
+}
+
+/* ── Login ── */
+async function handleLogin() {
+  const input = document.getElementById('pat-input');
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  const pat = input.value.trim();
+  if (!pat) { errEl.textContent = 'Please enter a token.'; return; }
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Authenticating…';
+  try {
+    sessionStorage.setItem('gh_pat', pat);
+    await fetchConfig(pat);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    render();
+    showToast('Authenticated — config loaded');
+  } catch (e) {
+    sessionStorage.removeItem('gh_pat');
+    errEl.textContent = e.message.includes('401') ? 'Invalid token — check scopes & expiry.' :
+                        e.message.includes('404') ? 'Repo or file not found.' : e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Authenticate';
+  }
+}
+
+function handleLogout() {
+  sessionStorage.removeItem('gh_pat');
+  config = null; fileSha = null;
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pat-input').value = '';
+}
+
+/* PAT input enter key */
+document.getElementById('pat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+/* ── Render ── */
+function getMachines() {
+  if (!config || !config.images || !config.images.machines) return {};
+  return config.images.machines;
+}
+
+function renderCard(key, m, isSold) {
+  const specs = m.specs || {};
+  const specKeys = ['CPU','GPU','RAM','Storage','Motherboard','Cooling','Case','PSU','OS'];
+  let specHTML = '';
+  for (const sk of specKeys) {
+    if (specs[sk]) {
+      specHTML += `<span class="spec-key">${sk}</span><span class="spec-val">${esc(specs[sk])}</span>`;
+    }
+  }
+  return `
+    <div class="card ${isSold ? 'sold-card' : ''}">
+      <div class="card-top">
+        <span class="card-title">${esc(m.title || key)}</span>
+        <span class="card-tag">${esc(m.tag || '—')}</span>
+      </div>
+      <div class="card-price">${esc(m.price || '—')}</div>
+      ${specHTML ? `<div class="card-specs">${specHTML}</div>` : ''}
+      <div class="card-actions">
+        ${isSold
+          ? `<button class="card-btn unsell" onclick="moveMachine('${key}',false)" ${busy?'disabled':''}>← Move back to Available</button>`
+          : `<button class="card-btn sell" onclick="moveMachine('${key}',true)" ${busy?'disabled':''}>Mark as Sold → Portfolio</button>`
+        }
+        <button class="card-btn delete" onclick="deleteMachine('${key}')" ${busy?'disabled':''}>Delete</button>
+      </div>
+    </div>`;
+}
+
+function esc(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function render() {
+  const machines = getMachines();
+  const keys = Object.keys(machines);
+  let availHTML = '', portHTML = '';
+  let availCount = 0, portCount = 0;
+  for (const k of keys) {
+    const m = machines[k];
+    if (m.sold === true) { portHTML += renderCard(k, m, true); portCount++; }
+    else { availHTML += renderCard(k, m, false); availCount++; }
+  }
+  document.getElementById('available-list').innerHTML = availHTML || '<div class="empty-state">No available machines</div>';
+  document.getElementById('portfolio-list').innerHTML = portHTML || '<div class="empty-state">No sold machines yet</div>';
+  document.getElementById('available-count').textContent = availCount;
+  document.getElementById('portfolio-count').textContent = portCount;
+}
+
+/* ── Actions ── */
+async function refreshData() {
+  if (busy) return;
+  setLoading(true);
+  try {
+    await fetchConfig(getPAT());
+    render();
+    showToast('Config refreshed');
+  } catch (e) {
+    showToast('Refresh failed: ' + e.message, 'error');
+  } finally { setLoading(false); }
+}
+
+async function moveMachine(key, toSold) {
+  if (busy) return;
+  setLoading(true);
+  try {
+    await fetchConfig(getPAT());
+    const m = config.images.machines[key];
+    if (!m) throw new Error(`Machine ${key} not found`);
+    if (toSold) { m.sold = true; } else { delete m.sold; }
+    const verb = toSold ? 'sold' : 'available';
+    await saveConfig(`admin: mark ${key} as ${verb}`);
+    await fetchConfig(getPAT());
+    render();
+    showToast(`${m.title || key} → ${toSold ? 'Portfolio' : 'Available'}`);
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally { setLoading(false); }
+}
+
+async function deleteMachine(key) {
+  if (busy) return;
+  const machines = getMachines();
+  const m = machines[key];
+  const confirmed = await openConfirm('Delete Machine', `Permanently delete "${m?.title || key}"? This will commit to the repo.`);
+  if (!confirmed) return;
+  setLoading(true);
+  try {
+    await fetchConfig(getPAT());
+    if (!config.images.machines[key]) throw new Error(`Machine ${key} not found`);
+    const title = config.images.machines[key].title || key;
+    delete config.images.machines[key];
+    await saveConfig(`admin: delete ${key} (${title})`);
+    await fetchConfig(getPAT());
+    render();
+    showToast(`Deleted "${title}"`);
+  } catch (e) {
+    showToast('Delete failed: ' + e.message, 'error');
+  } finally { setLoading(false); }
+}
+
+/* ── Add Form ── */
+function toggleAddForm() {
+  const toggle = document.getElementById('add-toggle');
+  const form = document.getElementById('add-form');
+  toggle.classList.toggle('open');
+  form.classList.toggle('open');
+}
+
+async function handleAddMachine() {
+  if (busy) return;
+  const title = document.getElementById('f-title').value.trim();
+  const tag = document.getElementById('f-tag').value.trim();
+  const price = document.getElementById('f-price').value.trim();
+  if (!title || !tag || !price) { showToast('Title, Tag, and Price are required.', 'error'); return; }
+
+  setLoading(true);
+  try {
+    await fetchConfig(getPAT());
+    const machines = config.images.machines;
+    // Auto-generate key
+    const nums = Object.keys(machines).map(k => { const n = parseInt(k.replace(/\D/g,'')); return isNaN(n)?0:n; });
+    const nextNum = (nums.length ? Math.max(...nums) : 0) + 1;
+    const key = `m${nextNum}`;
+
+    const specs = {};
+    const specFields = [
+      ['f-cpu','CPU'],['f-gpu','GPU'],['f-ram','RAM'],['f-storage','Storage'],
+      ['f-mobo','Motherboard'],['f-cooling','Cooling'],['f-case','Case'],['f-psu','PSU'],['f-os','OS']
+    ];
+    for (const [id, name] of specFields) {
+      const v = document.getElementById(id).value.trim();
+      if (v) specs[name] = v;
+    }
+
+    machines[key] = { tag, title, price, specs };
+    await saveConfig(`admin: add ${key} — ${title}`);
+    await fetchConfig(getPAT());
+    render();
+    showToast(`Added "${title}" as ${key}`);
+
+    // Clear form
+    for (const id of ['f-title','f-tag','f-price','f-cpu','f-gpu','f-ram','f-storage','f-mobo','f-cooling','f-case','f-psu','f-os']) {
+      document.getElementById(id).value = '';
+    }
+  } catch (e) {
+    showToast('Add failed: ' + e.message, 'error');
+  } finally { setLoading(false); }
+}
+
+/* ── Auto-login if session exists ── */
+(async () => {
+  const pat = getPAT();
+  if (pat) {
+    try {
+      await fetchConfig(pat);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      render();
+    } catch { sessionStorage.removeItem('gh_pat'); }
+  }
+})();
+</script>
+</body>
+</html>
