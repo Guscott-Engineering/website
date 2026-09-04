@@ -236,6 +236,7 @@
 let _config = null;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
+const _loadedImageUrls = new Set();
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 async function loadConfig() {
@@ -279,6 +280,9 @@ async function fetchCloudinaryImages(cloudName, tag) {
 function setImageHints(el, options = {}) {
   if (!el) return;
   el.decoding = 'async';
+  el.addEventListener('load', () => {
+    if (el.currentSrc || el.src) _loadedImageUrls.add(el.currentSrc || el.src);
+  }, { once: true });
   if (options.loading) el.loading = options.loading;
   if (options.fetchPriority) el.fetchPriority = options.fetchPriority;
   if (options.sizes) el.sizes = options.sizes;
@@ -295,10 +299,21 @@ function swapImageSource(imgEl, nextSrc) {
   imgEl.dataset.pendingSrc = nextSrc;
   imgEl.classList.add('ge-media-swapping');
 
+  const existingImage = Array.from(document.images).find(img => (img.currentSrc || img.src) === nextSrc && img.complete);
+  if (_loadedImageUrls.has(nextSrc) || existingImage) {
+    imgEl.src = nextSrc;
+    _loadedImageUrls.add(nextSrc);
+    requestAnimationFrame(() => {
+      if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
+    });
+    return;
+  }
+
   const preloader = new Image();
   preloader.decoding = 'async';
   preloader.onload = () => {
     if (imgEl.dataset.pendingSrc !== nextSrc) return;
+    _loadedImageUrls.add(nextSrc);
     imgEl.src = nextSrc;
     requestAnimationFrame(() => {
       if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
@@ -732,10 +747,9 @@ function initSmoothSectionLinks() {
     if (!href || href === '#') return;
     const target = getTargetFromHash(href);
     if (!target) return;
-
     e.preventDefault();
     if (window.location.hash === href) {
-      history.pushState(null, '', href);
+    if (window.location.hash === href) {
       smoothScrollToSection(target);
       return;
     }
