@@ -556,7 +556,7 @@ function initSmoothSectionLinks() {
 
     e.preventDefault();
     if (window.location.hash !== href) {
-      history.replaceState(null, '', href);
+      history.pushState(null, '', href);
     }
     smoothScrollToSection(target);
   });
@@ -565,7 +565,7 @@ function initSmoothSectionLinks() {
 function getTargetFromHash(hash) {
   if (!hash || hash === '#') return null;
   const id = decodeURIComponent(hash.slice(1));
-  if (!id) return document.getElementById('top');
+  if (!id) return document.body;
   return document.getElementById(id);
 }
 
