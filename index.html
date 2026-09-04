@@ -36,10 +36,10 @@
         <span class="ge-logo__sub" style="font-family:var(--font-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;">Engineering Electronics</span>
       </a>
       <nav class="ge-nav" style="align-items:center;gap:6px;">
-        <a class="ge-navlink" href="#available">Available</a>
-        <a class="ge-navlink" href="#portfolio">Portfolio</a>
-        <a class="ge-navlink" href="#about">About</a>
-        <a class="ge-navlink" href="#contact">Contact</a>
+        <a class="ge-navlink" href="#available" data-scroll="available">Available</a>
+        <a class="ge-navlink" href="#portfolio" data-scroll="portfolio">Portfolio</a>
+        <a class="ge-navlink" href="#about" data-scroll="about">About</a>
+        <a class="ge-navlink" href="#contact" data-scroll="contact">Contact</a>
       </nav>
       <a class="ge-btn ge-btn--primary ge-btn--sm" href="mailto:Guscottengineering@gmail.com">Email Ayden</a>
     </div>
@@ -676,6 +676,8 @@ function smoothScrollToSection(target) {
   const headerOffset = header ? header.getBoundingClientRect().height : 0;
   const startY = window.pageYOffset;
   const targetY = Math.max(0, target.getBoundingClientRect().top + startY - headerOffset);
+  cancelAnimationFrame(_activeSmoothScroll);
+  _activeSmoothScroll = 0;
 
   if (prefersReducedMotion.matches) {
     window.scrollTo(0, targetY);
@@ -683,7 +685,6 @@ function smoothScrollToSection(target) {
     return;
   }
 
-  cancelAnimationFrame(_activeSmoothScroll);
   const distance = targetY - startY;
   const duration = Math.min(900, Math.max(500, Math.abs(distance) * 0.45));
   let startTime = 0;
@@ -706,7 +707,7 @@ function smoothScrollToSection(target) {
 
 function initSmoothSectionLinks() {
   document.addEventListener('click', function(e) {
-    const link = e.target.closest('a[href^="#"]');
+    const link = e.target.closest('a[data-scroll][href^="#"]');
     if (!link) return;
     if (link.target && link.target !== '_self') return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
