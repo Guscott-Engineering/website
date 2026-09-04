@@ -168,7 +168,9 @@ async function loadMachines(config) {
   try {
     const container = document.getElementById('machines-container');
     if (!container) return;
-    const machines = Object.entries(config.images.machines).map(([id, m]) => ({ id, ...m }));
+    const machines = Object.entries(config.images.machines)
+      .map(([id, m]) => ({ id, ...m }))
+      .filter(machine => !machine.sold);
     let hasAny = false;
     const machineDecks = await Promise.all(
       machines.map(async machine => ({
