@@ -752,18 +752,19 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    window.location.hash = href;
+    history.pushState(null, '', href);
+    smoothScrollToSection(target);
   });
 }
 
 function getTargetFromHash(hash) {
-  if (!hash || hash === '#') return null;
+  if (!hash || hash === '#') return document.body;
   const id = decodeURIComponent(hash.slice(1));
   if (!id) return document.body;
-  return document.getElementById(id);
+  return document.getElementById(id) || document.getElementsByName(id)[0] || null;
 }
 
-function handleHashNavigation() {
+function handleHistoryNavigation() {
   const target = getTargetFromHash(window.location.hash);
   if (target) smoothScrollToSection(target);
 }
@@ -776,9 +777,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Adaptive header on scroll
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
-  window.addEventListener('hashchange', handleHashNavigation);
+  window.addEventListener('popstate', handleHistoryNavigation);
   initSmoothSectionLinks();
-  if (window.location.hash) handleHashNavigation();
+  if (window.location.hash) handleHistoryNavigation();
   queueHeaderToneUpdate();
 
   // Modal close handlers
