@@ -114,6 +114,7 @@ img{max-width:100%;}
   position:absolute;
   inset:0;
   opacity:0;
+  visibility:hidden;
   transform:translateY(10px);
   transition:opacity .8s cubic-bezier(.4,0,.2,1),transform .8s cubic-bezier(.4,0,.2,1);
   pointer-events:none;
@@ -121,6 +122,7 @@ img{max-width:100%;}
 }
 .ge-portfolio-slide.is-active{
   opacity:1;
+  visibility:visible;
   transform:translateY(0);
   pointer-events:auto;
 }
@@ -218,12 +220,6 @@ img{max-width:100%;}
   .ge-sold-next{
     transition:none !important;
     will-change:auto !important;
-  }
-  .ge-portfolio-slide{
-    visibility:hidden;
-  }
-  .ge-portfolio-slide.is-active{
-    visibility:visible;
   }
 }
 

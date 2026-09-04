@@ -580,6 +580,7 @@ function initSmoothSectionLinks() {
     if (!link) return;
     if (link.target && link.target !== '_self') return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
+    if (prefersReducedMotion.matches) return;
 
     const href = link.getAttribute('href');
     if (!href || href === '#') return;
@@ -591,6 +592,7 @@ function initSmoothSectionLinks() {
       return;
     }
     history.pushState(null, '', href);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
     smoothScrollToSection(target);
   });
 }
