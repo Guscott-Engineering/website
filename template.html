@@ -520,6 +520,7 @@ function smoothScrollToSection(target) {
   if (prefersReducedMotion.matches) {
     window.scrollTo(0, targetY);
     queueHeaderToneUpdate();
+    focusScrollTarget(target);
     return;
   }
 
@@ -537,10 +538,18 @@ function smoothScrollToSection(target) {
       _activeSmoothScroll = requestAnimationFrame(step);
     } else {
       _activeSmoothScroll = 0;
+      focusScrollTarget(target);
     }
   };
 
   _activeSmoothScroll = requestAnimationFrame(step);
+}
+
+function focusScrollTarget(target) {
+  if (!target || typeof target.focus !== 'function') return;
+  const isNativelyFocusable = target.matches('a, button, input, select, textarea, summary, [tabindex]');
+  if (!isNativelyFocusable) target.setAttribute('tabindex', '-1');
+  target.focus({ preventScroll: true });
 }
 
 function initSmoothSectionLinks() {
@@ -556,10 +565,11 @@ function initSmoothSectionLinks() {
     if (!target) return;
 
     e.preventDefault();
-    if (window.location.hash !== href) {
-      history.pushState(null, '', href);
+    if (window.location.hash === href) {
+      smoothScrollToSection(target);
+      return;
     }
-    smoothScrollToSection(target);
+    window.location.hash = href;
   });
 }
 

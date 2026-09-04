@@ -219,6 +219,12 @@ img{max-width:100%;}
     transition:none !important;
     will-change:auto !important;
   }
+  .ge-portfolio-slide{
+    visibility:hidden;
+  }
+  .ge-portfolio-slide.is-active{
+    visibility:visible;
+  }
 }
 
 /* ---- Placeholder frames (replace the fillable image-slots) ----
