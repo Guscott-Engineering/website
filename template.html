@@ -547,8 +547,15 @@ function smoothScrollToSection(target) {
 
 function focusScrollTarget(target) {
   if (!target || typeof target.focus !== 'function') return;
+  const hadTabIndex = target.hasAttribute('tabindex');
   const isNativelyFocusable = target.matches('a, button, input, select, textarea, summary, [tabindex]');
-  if (!isNativelyFocusable) target.setAttribute('tabindex', '-1');
+  if (!isNativelyFocusable) {
+    target.setAttribute('tabindex', '-1');
+    target.addEventListener('blur', function cleanupTemporaryTabIndex() {
+      if (!hadTabIndex) target.removeAttribute('tabindex');
+      target.removeEventListener('blur', cleanupTemporaryTabIndex);
+    }, { once: true });
+  }
   target.focus({ preventScroll: true });
 }
 
@@ -566,6 +573,7 @@ function initSmoothSectionLinks() {
 
     e.preventDefault();
     if (window.location.hash === href) {
+      history.pushState(null, '', href);
       smoothScrollToSection(target);
       return;
     }
