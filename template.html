@@ -537,7 +537,7 @@ function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-function smoothScrollToSection(target) {
+function smoothScrollToSection(target, onComplete) {
   if (!target) return;
   const header = document.querySelector('.ge-header');
   const headerOffset = header ? header.getBoundingClientRect().height : 0;
@@ -550,6 +550,7 @@ function smoothScrollToSection(target) {
     window.scrollTo(0, targetY);
     queueHeaderToneUpdate();
     focusScrollTarget(target);
+    if (typeof onComplete === 'function') onComplete();
     return;
   }
 
@@ -568,6 +569,7 @@ function smoothScrollToSection(target) {
     } else {
       _activeSmoothScroll = 0;
       focusScrollTarget(target);
+      if (typeof onComplete === 'function') onComplete();
     }
   };
 
@@ -598,10 +600,15 @@ function initSmoothSectionLinks() {
     if (!href || href === '#') return;
     const target = document.getElementById(link.dataset.scroll);
     if (!target) return;
-    if (!prefersReducedMotion.matches && window.location.hash === href) {
-      e.preventDefault();
+    if (prefersReducedMotion.matches) return;
+    e.preventDefault();
+    if (window.location.hash === href) {
       smoothScrollToSection(target);
+      return;
     }
+    smoothScrollToSection(target, () => {
+      if (window.location.hash !== href) window.location.hash = href;
+    });
   });
 }
 

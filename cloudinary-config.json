@@ -53,7 +53,7 @@
         }
       },
       "m4": {
-        "tag": "PC4", "title": "Custom PC Workstation 04", "price": "$1200",
+        "tag": "PC4", "title": "Custom PC Workstation 04", "price": "$1200", "sold": true,
         "specs": {
           "CPU": "AMD Ryzen 7 5800X",
           "GPU": "AMD RX 6700 XT",
