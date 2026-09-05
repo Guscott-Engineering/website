@@ -607,7 +607,7 @@ function initSmoothSectionLinks() {
       return;
     }
     smoothScrollToSection(target, () => {
-      if (window.location.hash !== href) history.pushState(null, '', href);
+      if (window.location.hash !== href) history.replaceState(null, '', href);
     });
   });
 }
