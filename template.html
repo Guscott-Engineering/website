@@ -138,8 +138,7 @@ function swapImageSource(imgEl, nextSrc) {
   imgEl.dataset.pendingSrc = nextSrc;
   imgEl.classList.add('ge-media-swapping');
 
-  const existingImage = Array.from(document.images).find(img => (img.currentSrc || img.src) === nextSrc && img.complete);
-  if (_loadedImageUrls.has(nextSrc) || existingImage) {
+  if (_loadedImageUrls.has(nextSrc)) {
     imgEl.src = nextSrc;
     _loadedImageUrls.add(nextSrc);
     requestAnimationFrame(() => {
@@ -606,8 +605,7 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    history.pushState(null, '', href);
-    smoothScrollToSection(target);
+    window.location.hash = href;
   });
 }
 
@@ -632,7 +630,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Adaptive header on scroll
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
-  window.addEventListener('popstate', handleHistoryNavigation);
+  window.addEventListener('hashchange', handleHistoryNavigation);
   initSmoothSectionLinks();
   if (window.location.hash) handleHistoryNavigation();
   queueHeaderToneUpdate();
