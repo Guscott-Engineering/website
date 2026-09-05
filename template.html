@@ -658,6 +658,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('hashchange', handleHashAnchors);
+  window.addEventListener('popstate', handleHashAnchors);
   initSmoothSectionLinks();
   handleHashAnchors();
   queueHeaderToneUpdate();
