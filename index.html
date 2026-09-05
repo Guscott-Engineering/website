@@ -760,7 +760,8 @@ function initSmoothSectionLinks() {
 
     const href = link.getAttribute('href');
     if (!href || href === '#') return;
-    const target = document.getElementById(link.dataset.scroll);
+    const targetId = href.slice(1);
+    const target = document.getElementById(targetId) || document.getElementById(link.dataset.scroll);
     if (!target) return;
     e.preventDefault();
     if (window.location.hash === href) {
