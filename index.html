@@ -236,6 +236,7 @@
 let _config = null;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
+let _skipNextHashChange = false;
 const _loadedImageUrls = new Set();
 const _imagePreloadPromises = new Map();
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -282,50 +283,55 @@ function setImageHints(el, options = {}) {
   if (!el) return;
   el.decoding = 'async';
   el.addEventListener('load', () => {
-    if (el.currentSrc || el.src) _loadedImageUrls.add(el.currentSrc || el.src);
+    if (el.currentSrc || el.src) _loadedImageUrls.add(normalizeUrl(el.currentSrc || el.src));
   }, { once: true });
   if (options.loading) el.loading = options.loading;
   if (options.fetchPriority) el.fetchPriority = options.fetchPriority;
   if (options.sizes) el.sizes = options.sizes;
 }
 
+function normalizeUrl(src) {
+  try {
+    return new URL(src, window.location.href).href;
+  } catch (error) {
+    return src;
+  }
+}
+
 function swapImageSource(imgEl, nextSrc) {
   if (!imgEl || !nextSrc) return;
+  const normalizedNextSrc = normalizeUrl(nextSrc);
   const currentSrc = imgEl.getAttribute('src') || '';
-  try {
-    if (new URL(currentSrc, window.location.href).href === new URL(nextSrc, window.location.href).href) return;
-  } catch (error) {
-    if (currentSrc === nextSrc) return;
-  }
+  if (normalizeUrl(currentSrc) === normalizedNextSrc) return;
   imgEl.dataset.pendingSrc = nextSrc;
   imgEl.classList.add('ge-media-swapping');
 
-  if (_loadedImageUrls.has(nextSrc)) {
+  if (_loadedImageUrls.has(normalizedNextSrc)) {
     imgEl.src = nextSrc;
-    _loadedImageUrls.add(nextSrc);
+    _loadedImageUrls.add(normalizedNextSrc);
     requestAnimationFrame(() => {
       if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
     });
     return;
   }
 
-  let preloadPromise = _imagePreloadPromises.get(nextSrc);
+  let preloadPromise = _imagePreloadPromises.get(normalizedNextSrc);
   if (!preloadPromise) {
     preloadPromise = new Promise((resolve, reject) => {
       const preloader = new Image();
       preloader.decoding = 'async';
       preloader.onload = () => {
-        _loadedImageUrls.add(nextSrc);
-        _imagePreloadPromises.delete(nextSrc);
+        _loadedImageUrls.add(normalizedNextSrc);
+        _imagePreloadPromises.delete(normalizedNextSrc);
         resolve();
       };
       preloader.onerror = () => {
-        _imagePreloadPromises.delete(nextSrc);
+        _imagePreloadPromises.delete(normalizedNextSrc);
         reject(new Error(`Failed to preload ${nextSrc}`));
       };
       preloader.src = nextSrc;
     });
-    _imagePreloadPromises.set(nextSrc, preloadPromise);
+    _imagePreloadPromises.set(normalizedNextSrc, preloadPromise);
   }
 
   preloadPromise.then(() => {
@@ -775,7 +781,10 @@ function initSmoothSectionLinks() {
         return;
       }
       jumpToSection(target, () => {
-        if (window.location.hash !== href) window.location.hash = href;
+        if (window.location.hash !== href) {
+          _skipNextHashChange = true;
+          window.location.hash = href;
+        }
       });
       return;
     }
@@ -790,6 +799,18 @@ function initSmoothSectionLinks() {
   });
 }
 
+function handleHashAnchors() {
+  if (_skipNextHashChange) {
+    _skipNextHashChange = false;
+    return;
+  }
+  if (!window.location.hash) return;
+  const targetId = decodeURIComponent(window.location.hash.slice(1));
+  const target = document.getElementById(targetId) || document.getElementsByName(targetId)[0];
+  if (!target) return;
+  jumpToSection(target);
+}
+
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
   // Init Lucide icons
@@ -798,7 +819,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Adaptive header on scroll
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
+  window.addEventListener('hashchange', handleHashAnchors);
   initSmoothSectionLinks();
+  handleHashAnchors();
   queueHeaderToneUpdate();
 
   // Modal close handlers
