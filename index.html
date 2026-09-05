@@ -706,11 +706,12 @@ function getSectionScrollTargetY(target) {
   return Math.max(0, target.getBoundingClientRect().top + window.pageYOffset - headerOffset);
 }
 
-function jumpToSection(target) {
+function jumpToSection(target, onComplete) {
   if (!target) return;
   window.scrollTo(0, getSectionScrollTargetY(target));
   queueHeaderToneUpdate();
   focusScrollTarget(target);
+  if (typeof onComplete === 'function') onComplete();
 }
 
 function smoothScrollToSection(target, onComplete) {
@@ -768,10 +769,14 @@ function initSmoothSectionLinks() {
     const target = document.getElementById(targetId) || document.getElementById(link.dataset.scroll);
     if (!target) return;
     if (prefersReducedMotion.matches) {
+      e.preventDefault();
       if (window.location.hash === href) {
-        e.preventDefault();
         jumpToSection(target);
+        return;
       }
+      jumpToSection(target, () => {
+        if (window.location.hash !== href) window.location.hash = href;
+      });
       return;
     }
     e.preventDefault();
@@ -780,7 +785,7 @@ function initSmoothSectionLinks() {
       return;
     }
     smoothScrollToSection(target, () => {
-      if (window.location.hash !== href) history.replaceState(null, '', href);
+      if (window.location.hash !== href) history.pushState(null, '', href);
     });
   });
 }
