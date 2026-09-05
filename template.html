@@ -600,7 +600,6 @@ function initSmoothSectionLinks() {
     if (!href || href === '#') return;
     const target = document.getElementById(link.dataset.scroll);
     if (!target) return;
-    if (prefersReducedMotion.matches) return;
     e.preventDefault();
     if (window.location.hash === href) {
       smoothScrollToSection(target);

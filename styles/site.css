@@ -203,7 +203,6 @@ img{max-width:100%;}
 @media (prefers-reduced-motion: reduce) {
   .ge-fade-enter,
   .ge-machine-main,
-  .ge-portfolio-slide,
   .ge-sold-track,
   .ge-machine-img-wrap img,
   .ge-thumb-btn,
@@ -211,6 +210,11 @@ img{max-width:100%;}
     animation:none !important;
     transition:none !important;
     transform:none !important;
+    will-change:auto !important;
+  }
+  .ge-portfolio-slide{
+    animation:none !important;
+    transition:none !important;
     will-change:auto !important;
   }
   .ge-port-prev,
