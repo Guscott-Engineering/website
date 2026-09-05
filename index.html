@@ -742,12 +742,11 @@ function focusScrollTarget(target) {
   const isNativelyFocusable = target.matches('a, button, input, select, textarea, summary, [tabindex]');
   if (!isNativelyFocusable) {
     target.setAttribute('tabindex', '-1');
-    target.addEventListener('blur', function cleanupTemporaryTabIndex() {
-      if (!hadTabIndex) target.removeAttribute('tabindex');
-      target.removeEventListener('blur', cleanupTemporaryTabIndex);
-    }, { once: true });
   }
   target.focus({ preventScroll: true });
+  if (!hadTabIndex && !isNativelyFocusable) {
+    requestAnimationFrame(() => target.removeAttribute('tabindex'));
+  }
 }
 
 function initSmoothSectionLinks() {
@@ -767,7 +766,8 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    window.location.hash = href;
+    history.pushState(null, '', href);
+    smoothScrollToSection(target);
   });
 }
 
