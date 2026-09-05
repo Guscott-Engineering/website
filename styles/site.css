@@ -7,7 +7,6 @@
    ============================================================ */
 
 *{box-sizing:border-box;}
-html{scroll-padding-top:72px;}
 body{margin:0;background:var(--paper);overflow-x:hidden;}
 img{max-width:100%;}
 
