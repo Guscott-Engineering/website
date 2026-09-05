@@ -753,7 +753,8 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    window.location.hash = href;
+    history.pushState(null, '', href);
+    smoothScrollToSection(target);
   });
 }
 
