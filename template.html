@@ -591,8 +591,7 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    history.pushState(null, '', href);
-    smoothScrollToSection(target);
+    window.location.hash = href;
   });
 }
 
@@ -603,11 +602,6 @@ function getTargetFromHash(hash) {
   return document.getElementById(id) || document.getElementsByName(id)[0] || null;
 }
 
-function handleHistoryNavigation() {
-  const target = getTargetFromHash(window.location.hash);
-  if (target) smoothScrollToSection(target);
-}
-
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
   // Init Lucide icons
@@ -616,9 +610,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Adaptive header on scroll
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
-  window.addEventListener('popstate', handleHistoryNavigation);
   initSmoothSectionLinks();
-  if (window.location.hash) handleHistoryNavigation();
   queueHeaderToneUpdate();
 
   // Modal close handlers
