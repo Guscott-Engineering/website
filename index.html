@@ -36,10 +36,10 @@
         <span class="ge-logo__sub" style="font-family:var(--font-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;">Engineering Electronics</span>
       </a>
       <nav class="ge-nav" style="align-items:center;gap:6px;">
-        <a class="ge-navlink" href="#available">Available</a>
-        <a class="ge-navlink" href="#portfolio">Portfolio</a>
-        <a class="ge-navlink" href="#about">About</a>
-        <a class="ge-navlink" href="#contact">Contact</a>
+        <a class="ge-navlink" href="#available" data-scroll="available">Available</a>
+        <a class="ge-navlink" href="#portfolio" data-scroll="portfolio">Portfolio</a>
+        <a class="ge-navlink" href="#about" data-scroll="about">About</a>
+        <a class="ge-navlink" href="#contact" data-scroll="contact">Contact</a>
       </nav>
       <a class="ge-btn ge-btn--primary ge-btn--sm" href="mailto:Guscottengineering@gmail.com">Email Ayden</a>
     </div>
@@ -51,17 +51,17 @@
     <div style="position:absolute;width:640px;height:640px;right:-180px;top:-160px;border-radius:50%;background:radial-gradient(circle,var(--volt-glow) 0%,transparent 62%);pointer-events:none;"></div>
     <div style="position:relative;max-width:1100px;margin:0 auto;padding:136px 24px 94px;">
       <div class="ge-hero-grid">
-        <div style="animation:geFade .6s var(--ease-mechanical) both;">
+        <div class="ge-fade-enter">
           <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--volt-400);margin-bottom:22px;">Custom builds · Refurbished · Atlanta, GA</div>
           <h1 style="font-family:var(--font-display);font-weight:700;font-size:clamp(40px,6vw,72px);line-height:1.05;letter-spacing:.005em;margin:0 0 22px;">Engineering from a<br>different angle</h1>
           <p style="font-size:18px;line-height:1.6;color:var(--ink-200);max-width:44ch;margin:0 0 14px;">Building and refurbishing computers in Atlanta, GA — one machine at a time.</p>
           <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-400);margin:0 0 36px;">Built by Ayden · Solo builder</p>
           <a class="ge-btn ge-btn--primary ge-btn--lg" href="#available" data-scroll="available">See What's Available</a>
         </div>
-        <div style="animation:geFade .6s .12s var(--ease-mechanical) both;position:relative;">
+        <div class="ge-fade-enter ge-fade-enter--delay" style="position:relative;">
           <div class="ge-cut" style="position:absolute;inset:-1.5px;background:linear-gradient(135deg,var(--volt-500) 0%,transparent 50%);opacity:.7;"></div>
           <div class="ge-cut" style="position:relative;background:var(--ink-1000);aspect-ratio:4/5;box-shadow:var(--elev-dark-2);">
-            <img data-image-key="hero-main" src="data:," alt="Custom build, powered on" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <img class="ge-cloudinary-image" data-image-key="hero-main" src="data:," alt="Custom build, powered on" decoding="async" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;display:block;">
           </div>
           <div style="position:absolute;bottom:14px;left:14px;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-200);background:rgba(10,12,15,.6);padding:5px 9px;border-radius:3px;">Lian Li · RX 6700 · NZXT cooled</div>
         </div>
@@ -123,7 +123,7 @@
         <div style="position:relative;">
           <div class="ge-cut" style="position:absolute;inset:-1.5px;background:linear-gradient(135deg,var(--volt-500) 0%,transparent 50%);opacity:.5;"></div>
           <div class="ge-cut" style="position:relative;background:var(--ink-1000);aspect-ratio:4/3;box-shadow:var(--elev-dark-2);">
-            <img data-image-key="about-workdesk" src="data:," alt="Ayden's workbench — open case and tools on the desk" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <img class="ge-cloudinary-image" data-image-key="about-workdesk" src="data:," alt="Ayden's workbench — open case and tools on the desk" decoding="async" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">
           </div>
         </div>
         <div>
@@ -234,6 +234,12 @@
 // ===== IMAGE LOADING FROM cloudinary-config.json =====
 
 let _config = null;
+let _activeSmoothScroll = 0;
+let _headerToneQueued = false;
+let _skipNextHashChange = false;
+const _loadedImageUrls = new Set();
+const _imagePreloadPromises = new Map();
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 async function loadConfig() {
   if (_config) return _config;
@@ -273,6 +279,77 @@ async function fetchCloudinaryImages(cloudName, tag) {
   }
 }
 
+function setImageHints(el, options = {}) {
+  if (!el) return;
+  el.decoding = 'async';
+  if (el.complete && (el.currentSrc || el.src)) {
+    _loadedImageUrls.add(normalizeUrl(el.currentSrc || el.src));
+  }
+  el.addEventListener('load', () => {
+    if (el.currentSrc || el.src) _loadedImageUrls.add(normalizeUrl(el.currentSrc || el.src));
+  }, { once: true });
+  if (options.loading) el.loading = options.loading;
+  if (options.fetchPriority) el.fetchPriority = options.fetchPriority;
+  if (options.sizes) el.sizes = options.sizes;
+}
+
+function normalizeUrl(src) {
+  try {
+    return new URL(src, window.location.href).href;
+  } catch (error) {
+    return src;
+  }
+}
+
+function swapImageSource(imgEl, nextSrc) {
+  if (!imgEl || !nextSrc) return;
+  const normalizedNextSrc = normalizeUrl(nextSrc);
+  const currentSrc = imgEl.getAttribute('src') || '';
+  if (normalizeUrl(currentSrc) === normalizedNextSrc) return;
+  imgEl.dataset.pendingSrc = nextSrc;
+  imgEl.classList.add('ge-media-swapping');
+
+  if (_loadedImageUrls.has(normalizedNextSrc)) {
+    imgEl.src = nextSrc;
+    _loadedImageUrls.add(normalizedNextSrc);
+    requestAnimationFrame(() => {
+      if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
+    });
+    return;
+  }
+
+  let preloadPromise = _imagePreloadPromises.get(normalizedNextSrc);
+  if (!preloadPromise) {
+    preloadPromise = new Promise((resolve, reject) => {
+      const preloader = new Image();
+      preloader.decoding = 'async';
+      preloader.onload = () => {
+        _loadedImageUrls.add(normalizedNextSrc);
+        _imagePreloadPromises.delete(normalizedNextSrc);
+        resolve();
+      };
+      preloader.onerror = () => {
+        _imagePreloadPromises.delete(normalizedNextSrc);
+        reject(new Error(`Failed to preload ${nextSrc}`));
+      };
+      preloader.src = nextSrc;
+    });
+    _imagePreloadPromises.set(normalizedNextSrc, preloadPromise);
+  }
+
+  preloadPromise.then(() => {
+    if (imgEl.dataset.pendingSrc !== nextSrc) return;
+    imgEl.src = nextSrc;
+    requestAnimationFrame(() => {
+      if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
+    });
+  }).catch(() => {
+    if (imgEl.dataset.pendingSrc !== nextSrc) return;
+    imgEl.src = nextSrc;
+    imgEl.classList.remove('ge-media-swapping');
+  });
+}
+
 async function injectStaticImages(config) {
   const allSingleImageKeys = { ...config.images.hero, ...config.images.about };
   for (const [key, entry] of Object.entries(allSingleImageKeys)) {
@@ -281,6 +358,10 @@ async function injectStaticImages(config) {
     const images = await fetchCloudinaryImages(config.cloudName, entry.tag);
     const src = images.length > 0 ? images[0].secure_url : entry.fallback;
     els.forEach(el => {
+      setImageHints(el, {
+        loading: key === 'hero-main' ? 'eager' : 'lazy',
+        fetchPriority: key === 'hero-main' ? 'high' : 'auto',
+      });
       el.src = src;
       if (entry.alt && !el.getAttribute('alt')) el.alt = entry.alt;
     });
@@ -293,9 +374,14 @@ async function loadMachines(config) {
     if (!container) return;
     const machines = Object.entries(config.images.machines).map(([id, m]) => ({ id, ...m })).filter(m => !m.sold);
     let hasAny = false;
+    const machineDecks = await Promise.all(
+      machines.map(async machine => ({
+        machine,
+        images: await fetchCloudinaryImages(config.cloudName, machine.tag),
+      }))
+    );
 
-    for (const machine of machines) {
-      const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
+    for (const { machine, images } of machineDecks) {
       if (images.length === 0) continue;
       hasAny = true;
       const mainImg = images[0];
@@ -306,7 +392,7 @@ async function loadMachines(config) {
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
 
@@ -314,7 +400,7 @@ async function loadMachines(config) {
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
             <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-              <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
             </div>
             <div style="position:absolute;top:12px;left:12px;">
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
@@ -334,7 +420,7 @@ async function loadMachines(config) {
         btn.addEventListener('click', function() {
           const idx = parseInt(this.getAttribute('data-idx'));
           const mainEl = document.getElementById(`${machine.id}-main`);
-          if (mainEl && images[idx]) mainEl.src = images[idx].secure_url;
+          if (mainEl && images[idx]) swapImageSource(mainEl, images[idx].secure_url);
           document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
             b.style.borderColor = 'transparent';
           });
@@ -366,10 +452,9 @@ async function loadPortfolio(config) {
     let current = 0;
 
     const slidesHtml = images.map((img, i) => `
-      <div class="ge-portfolio-slide" data-slide="${i}"
-        style="display:${i === 0 ? 'block' : 'none'};width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--ink-1000);">
-        <img src="${img.secure_url}" alt="Portfolio build ${i + 1}"
-          style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s;" loading="lazy">
+      <div class="ge-portfolio-slide${i === 0 ? ' is-active' : ''}" data-slide="${i}" aria-hidden="${i === 0 ? 'false' : 'true'}">
+        <img class="ge-cloudinary-image" src="${img.secure_url}" alt="Portfolio build ${i + 1}"
+          decoding="async" loading="${i === 0 ? 'eager' : 'lazy'}">
       </div>
     `).join('');
 
@@ -382,7 +467,7 @@ async function loadPortfolio(config) {
 
     carousel.innerHTML = `
       <div style="position:relative;user-select:none;">
-        ${slidesHtml}
+        <div class="ge-portfolio-stage">${slidesHtml}</div>
         ${images.length > 1 ? `
           <button class="ge-port-prev" aria-label="Previous" style="${arrowStyle}left:-18px;">&#8249;</button>
           <button class="ge-port-next" aria-label="Next"     style="${arrowStyle}right:-18px;">&#8250;</button>
@@ -395,10 +480,12 @@ async function loadPortfolio(config) {
     const dots   = carousel.querySelectorAll('.ge-port-dot');
 
     function goTo(idx) {
-      slides[current].style.display = 'none';
+      slides[current].classList.remove('is-active');
+      slides[current].setAttribute('aria-hidden', 'true');
       dots[current] && (dots[current].style.background = 'var(--ink-600)');
       current = (idx + images.length) % images.length;
-      slides[current].style.display = 'block';
+      slides[current].classList.add('is-active');
+      slides[current].setAttribute('aria-hidden', 'false');
       dots[current] && (dots[current].style.background = 'var(--volt-400)');
     }
 
@@ -450,7 +537,7 @@ async function loadSoldBuilds(config) {
       const thumbsHtml = images.map((img, ti) => `
         <button class="ge-thumb-btn ge-sold-thumb-btn" data-sold-machine="${machine.id}" data-idx="${ti}"
           style="flex:none;width:48px;height:48px;padding:0;border:2px solid ${ti === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${ti + 1}">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${ti + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
 
@@ -460,7 +547,7 @@ async function loadSoldBuilds(config) {
       card.innerHTML = `
         <div style="position:relative;">
           <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-            <img id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
           </div>
           <div style="position:absolute;top:12px;left:12px;">
             <span class="ge-badge ge-badge--solid" style="background:var(--ink-700);color:var(--ink-300);">
@@ -518,7 +605,7 @@ async function loadSoldBuilds(config) {
       const deck = decks.find(d => d.machine.id === machId);
       if (!deck) return;
       const mainEl = document.getElementById(`${machId}-main`);
-      if (mainEl && deck.images[imgIdx]) mainEl.src = deck.images[imgIdx].secure_url;
+      if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
       track.querySelectorAll(`[data-sold-machine="${machId}"]`).forEach(b => b.style.borderColor = 'transparent');
       btn.style.borderColor = '#00ffcc';
     });
@@ -539,11 +626,12 @@ function openMachineModal(machineId) {
   document.getElementById('ge-modal-title').textContent = data.title;
   document.getElementById('ge-modal-price').textContent = data.price;
   const modalImg = document.getElementById('ge-modal-img');
+  setImageHints(modalImg, { loading: 'eager', fetchPriority: 'high' });
   const imgWrap = document.getElementById('ge-modal-img-wrap');
   const mainEl = document.getElementById(`${machineId}-main`);
   const activeUrl = mainEl ? mainEl.src : (data.images && data.images.length ? data.images[0].secure_url : '');
   if (modalImg && activeUrl) {
-    modalImg.src = activeUrl;
+    swapImageSource(modalImg, activeUrl);
     modalImg.alt = data.title;
     imgWrap.style.display = 'block';
   } else if (imgWrap) {
@@ -556,13 +644,13 @@ function openMachineModal(machineId) {
       const isActive = img.secure_url === activeUrl;
       return `<button class="ge-modal-thumb-btn" data-src="${img.secure_url}"
         style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${isActive ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-        <img src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${data.title} photo ${idx + 1}">
+        <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${data.title} photo ${idx + 1}" decoding="async" loading="lazy">
       </button>`;
     }).join('');
     thumbsWrap.style.display = 'flex';
     thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        modalImg.src = this.getAttribute('data-src');
+        swapImageSource(modalImg, this.getAttribute('data-src'));
         thumbsWrap.querySelectorAll('.ge-modal-thumb-btn').forEach(b => b.style.borderColor = 'transparent');
         this.style.borderColor = '#00ffcc';
       });
@@ -605,14 +693,143 @@ function updateHeaderTone() {
   header.classList.toggle('ge-header--light', tone === 'light');
 }
 
+function queueHeaderToneUpdate() {
+  if (_headerToneQueued) return;
+  _headerToneQueued = true;
+  requestAnimationFrame(() => {
+    _headerToneQueued = false;
+    updateHeaderTone();
+  });
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function getSectionScrollTargetY(target) {
+  if (!target) return 0;
+  const header = document.querySelector('.ge-header');
+  const headerOffset = header ? header.getBoundingClientRect().height : 0;
+  return Math.max(0, target.getBoundingClientRect().top + window.pageYOffset - headerOffset);
+}
+
+function jumpToSection(target, onComplete) {
+  if (!target) return;
+  window.scrollTo(0, getSectionScrollTargetY(target));
+  queueHeaderToneUpdate();
+  focusScrollTarget(target);
+  if (typeof onComplete === 'function') onComplete();
+}
+
+function smoothScrollToSection(target, onComplete) {
+  if (!target) return;
+  const startY = window.pageYOffset;
+  const targetY = getSectionScrollTargetY(target);
+  cancelAnimationFrame(_activeSmoothScroll);
+  _activeSmoothScroll = 0;
+
+  const distance = targetY - startY;
+  const duration = Math.min(900, Math.max(500, Math.abs(distance) * 0.45));
+  let startTime = 0;
+
+  const step = (timestamp) => {
+    if (!startTime) startTime = timestamp;
+    const progress = Math.min((timestamp - startTime) / duration, 1);
+    const eased = easeOutCubic(progress);
+    window.scrollTo(0, startY + distance * eased);
+    queueHeaderToneUpdate();
+    if (progress < 1) {
+      _activeSmoothScroll = requestAnimationFrame(step);
+    } else {
+      _activeSmoothScroll = 0;
+      focusScrollTarget(target);
+      if (typeof onComplete === 'function') onComplete();
+    }
+  };
+
+  _activeSmoothScroll = requestAnimationFrame(step);
+}
+
+function focusScrollTarget(target) {
+  if (!target || typeof target.focus !== 'function') return;
+  const hadTabIndex = target.hasAttribute('tabindex');
+  const isNativelyFocusable = target.matches('a, button, input, select, textarea, summary, [tabindex]');
+  if (!isNativelyFocusable) {
+    target.setAttribute('tabindex', '-1');
+  }
+  target.focus({ preventScroll: true });
+  if (!hadTabIndex && !isNativelyFocusable) {
+    requestAnimationFrame(() => target.removeAttribute('tabindex'));
+  }
+}
+
+function initSmoothSectionLinks() {
+  function handleSectionLinkActivation(link, e) {
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+    const targetId = decodeURIComponent(href.slice(1));
+    const target = document.getElementById(targetId) || document.getElementById(link.dataset.scroll);
+    if (!target) return;
+    if (prefersReducedMotion.matches) {
+      e.preventDefault();
+      if (window.location.hash === href) {
+        jumpToSection(target);
+        return;
+      }
+      jumpToSection(target, () => {
+        if (window.location.hash !== href) {
+          _skipNextHashChange = true;
+          window.location.hash = href;
+        }
+      });
+      return;
+    }
+    e.preventDefault();
+    if (window.location.hash === href) {
+      smoothScrollToSection(target);
+      return;
+    }
+    smoothScrollToSection(target, () => {
+      if (window.location.hash !== href) {
+        _skipNextHashChange = true;
+        window.location.hash = href;
+      }
+    });
+  }
+
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[data-scroll][href^="#"]');
+    if (!link) return;
+    if (link.target && link.target !== '_self') return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
+    handleSectionLinkActivation(link, e);
+  });
+}
+
+function handleHashAnchors() {
+  if (_skipNextHashChange) {
+    _skipNextHashChange = false;
+    return;
+  }
+  if (!window.location.hash) return;
+  const targetId = decodeURIComponent(window.location.hash.slice(1));
+  const target = document.getElementById(targetId) || document.getElementsByName(targetId)[0];
+  if (!target) return;
+  jumpToSection(target);
+}
+
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
   // Init Lucide icons
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   // Adaptive header on scroll
-  window.addEventListener('scroll', updateHeaderTone, { passive: true });
-  updateHeaderTone();
+  window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
+  window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
+  window.addEventListener('hashchange', handleHashAnchors);
+  initSmoothSectionLinks();
+  handleHashAnchors();
+  queueHeaderToneUpdate();
 
   // Modal close handlers
   document.getElementById('ge-modal-close')?.addEventListener('click', closeMachineModal);
