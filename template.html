@@ -601,12 +601,7 @@ function focusScrollTarget(target) {
 }
 
 function initSmoothSectionLinks() {
-  document.addEventListener('click', function(e) {
-    const link = e.target.closest('a[data-scroll][href^="#"]');
-    if (!link) return;
-    if (link.target && link.target !== '_self') return;
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
-
+  function handleSectionLinkActivation(link, e) {
     const href = link.getAttribute('href');
     if (!href || href === '#') return;
     const targetId = decodeURIComponent(href.slice(1));
@@ -637,6 +632,23 @@ function initSmoothSectionLinks() {
         window.location.hash = href;
       }
     });
+  }
+
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[data-scroll][href^="#"]');
+    if (!link) return;
+    if (link.target && link.target !== '_self') return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
+    handleSectionLinkActivation(link, e);
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const link = e.target.closest('a[data-scroll][href^="#"]');
+    if (!link) return;
+    if (link.target && link.target !== '_self') return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
+    handleSectionLinkActivation(link, e);
   });
 }
 
