@@ -803,15 +803,6 @@ function initSmoothSectionLinks() {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
     handleSectionLinkActivation(link, e);
   });
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key !== 'Enter') return;
-    const link = e.target.closest('a[data-scroll][href^="#"]');
-    if (!link) return;
-    if (link.target && link.target !== '_self') return;
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
-    handleSectionLinkActivation(link, e);
-  });
 }
 
 function handleHashAnchors() {
