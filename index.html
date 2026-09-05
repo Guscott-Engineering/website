@@ -766,7 +766,7 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    history.pushState(null, '', href);
+    history.replaceState(null, '', href);
     smoothScrollToSection(target);
   });
 }
@@ -794,7 +794,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('hashchange', handleHistoryNavigation);
   initSmoothSectionLinks();
-  if (window.location.hash) handleHistoryNavigation();
   queueHeaderToneUpdate();
 
   // Modal close handlers
