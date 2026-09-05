@@ -215,6 +215,7 @@ img{max-width:100%;}
   .ge-portfolio-slide{
     animation:none !important;
     transition:none !important;
+    transform:none !important;
     will-change:auto !important;
   }
   .ge-port-prev,
