@@ -593,27 +593,16 @@ function initSmoothSectionLinks() {
     if (!link) return;
     if (link.target && link.target !== '_self') return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) return;
-    if (prefersReducedMotion.matches) return;
 
     const href = link.getAttribute('href');
     if (!href || href === '#') return;
-    const target = getTargetFromHash(href);
+    const target = document.getElementById(link.dataset.scroll);
     if (!target) return;
-    e.preventDefault();
-    if (window.location.hash === href) {
+    if (!prefersReducedMotion.matches && window.location.hash === href) {
+      e.preventDefault();
       smoothScrollToSection(target);
-      return;
     }
-    history.pushState(null, '', href);
-    smoothScrollToSection(target);
   });
-}
-
-function getTargetFromHash(hash) {
-  if (!hash || hash === '#') return document.body;
-  const id = decodeURIComponent(hash.slice(1));
-  if (!id) return document.body;
-  return document.getElementById(id) || document.getElementsByName(id)[0] || null;
 }
 
 // ===== BOOT =====
