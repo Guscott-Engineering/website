@@ -120,6 +120,9 @@ async function fetchCloudinaryImages(cloudName, tag) {
 function setImageHints(el, options = {}) {
   if (!el) return;
   el.decoding = 'async';
+  if (el.complete && (el.currentSrc || el.src)) {
+    _loadedImageUrls.add(normalizeUrl(el.currentSrc || el.src));
+  }
   el.addEventListener('load', () => {
     if (el.currentSrc || el.src) _loadedImageUrls.add(normalizeUrl(el.currentSrc || el.src));
   }, { once: true });
@@ -664,7 +667,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('hashchange', handleHashAnchors);
-  window.addEventListener('popstate', handleHashAnchors);
   initSmoothSectionLinks();
   handleHashAnchors();
   queueHeaderToneUpdate();
