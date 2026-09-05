@@ -609,7 +609,7 @@ function initSmoothSectionLinks() {
 
     const href = link.getAttribute('href');
     if (!href || href === '#') return;
-    const targetId = href.slice(1);
+    const targetId = decodeURIComponent(href.slice(1));
     const target = document.getElementById(targetId) || document.getElementById(link.dataset.scroll);
     if (!target) return;
     if (prefersReducedMotion.matches) {
