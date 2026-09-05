@@ -805,7 +805,7 @@ function initSmoothSectionLinks() {
   });
 
   document.addEventListener('keydown', function(e) {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.key !== 'Enter') return;
     const link = e.target.closest('a[data-scroll][href^="#"]');
     if (!link) return;
     if (link.target && link.target !== '_self') return;
