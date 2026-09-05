@@ -763,13 +763,14 @@ function initSmoothSectionLinks() {
     const targetId = href.slice(1);
     const target = document.getElementById(targetId) || document.getElementById(link.dataset.scroll);
     if (!target) return;
+    if (prefersReducedMotion.matches) return;
     e.preventDefault();
     if (window.location.hash === href) {
       smoothScrollToSection(target);
       return;
     }
     smoothScrollToSection(target, () => {
-      if (window.location.hash !== href) history.pushState(null, '', href);
+      if (window.location.hash !== href) history.replaceState(null, '', href);
     });
   });
 }
