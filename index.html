@@ -766,7 +766,7 @@ function initSmoothSectionLinks() {
       smoothScrollToSection(target);
       return;
     }
-    history.replaceState(null, '', href);
+    history.pushState(null, '', href);
     smoothScrollToSection(target);
   });
 }
@@ -778,12 +778,6 @@ function getTargetFromHash(hash) {
   return document.getElementById(id) || document.getElementsByName(id)[0] || null;
 }
 
-function handleHistoryNavigation() {
-  if (!window.location.hash) return;
-  const target = getTargetFromHash(window.location.hash);
-  if (target) smoothScrollToSection(target);
-}
-
 // ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async function() {
   // Init Lucide icons
@@ -792,7 +786,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Adaptive header on scroll
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
-  window.addEventListener('hashchange', handleHistoryNavigation);
   initSmoothSectionLinks();
   queueHeaderToneUpdate();
 
