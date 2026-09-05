@@ -619,6 +619,7 @@ function getTargetFromHash(hash) {
 }
 
 function handleHistoryNavigation() {
+  if (!window.location.hash) return;
   const target = getTargetFromHash(window.location.hash);
   if (target) smoothScrollToSection(target);
 }
