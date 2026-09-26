@@ -75,12 +75,14 @@ let _config = null;
 let _configRequest = null;
 let _inventoryRefreshRequest = null;
 let _inventoryRefreshPending = false;
+let _lastInventoryRefreshAt = 0;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
 let _skipNextHashChange = false;
 const _loadedImageUrls = new Set();
 const _imagePreloadPromises = new Map();
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const INVENTORY_REFRESH_DEBOUNCE_MS = 1500;
 
 async function loadConfig(forceRefresh = false) {
   if (_config && !forceRefresh) return _config;
@@ -547,6 +549,7 @@ async function refreshInventoryFromConfig() {
         const config = await loadConfig(true);
         await loadMachines(config);
         await loadSoldBuilds(config);
+        _lastInventoryRefreshAt = Date.now();
         queueHeaderToneUpdate();
       } catch (error) {
         console.error('Inventory refresh error:', error);
@@ -556,6 +559,14 @@ async function refreshInventoryFromConfig() {
     _inventoryRefreshRequest = null;
   });
   return _inventoryRefreshRequest;
+}
+
+function requestInventoryRefresh(minIntervalMs = 0) {
+  if (_inventoryRefreshRequest) return refreshInventoryFromConfig();
+  if (_lastInventoryRefreshAt && Date.now() - _lastInventoryRefreshAt < minIntervalMs) {
+    return Promise.resolve(_config);
+  }
+  return refreshInventoryFromConfig();
 }
 
 // ===== PC DETAIL MODAL =====
@@ -770,9 +781,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('hashchange', handleHashAnchors);
-  window.addEventListener('focus', () => { refreshInventoryFromConfig(); });
+  window.addEventListener('focus', () => { requestInventoryRefresh(INVENTORY_REFRESH_DEBOUNCE_MS); });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refreshInventoryFromConfig();
+    if (!document.hidden) requestInventoryRefresh(INVENTORY_REFRESH_DEBOUNCE_MS);
   });
   initSmoothSectionLinks();
   handleHashAnchors();
