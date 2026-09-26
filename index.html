@@ -754,12 +754,7 @@ async function refreshInventoryFromConfig() {
 }
 
 function requestInventoryRefresh(minIntervalMs = 0) {
-  if (_inventoryRefreshRequest) {
-    if (_lastInventoryRefreshStartedAt && Date.now() - _lastInventoryRefreshStartedAt < minIntervalMs) {
-      return _inventoryRefreshRequest;
-    }
-    return refreshInventoryFromConfig();
-  }
+  if (_inventoryRefreshRequest) return _inventoryRefreshRequest;
   if (!_config) return refreshInventoryFromConfig();
   if (_lastInventoryRefreshAt && Date.now() - _lastInventoryRefreshAt < minIntervalMs) {
     return renderInventoryFromConfig(_config);
