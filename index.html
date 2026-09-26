@@ -770,6 +770,7 @@ async function refreshInventoryFromConfig() {
 function requestInventoryRefresh(minIntervalMs = 0) {
   if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   if (_inventoryRefreshRequest) {
+    _inventoryRefreshPending = true;
     const elapsedSinceStart = _lastInventoryRefreshStartedAt ? Date.now() - _lastInventoryRefreshStartedAt : minIntervalMs;
     const trailingDelay = Math.max(0, minIntervalMs - elapsedSinceStart);
     return scheduleInventoryRefresh(trailingDelay);
