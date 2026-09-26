@@ -236,6 +236,7 @@
 let _config = null;
 let _configRequest = null;
 let _inventoryRefreshRequest = null;
+let _inventoryRefreshPending = false;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
 let _skipNextHashChange = false;
@@ -697,7 +698,10 @@ async function loadSoldBuilds(config) {
 }
 
 async function refreshInventoryFromConfig() {
-  if (_inventoryRefreshRequest) return _inventoryRefreshRequest;
+  if (_inventoryRefreshRequest) {
+    _inventoryRefreshPending = true;
+    return _inventoryRefreshRequest;
+  }
   _inventoryRefreshRequest = (async () => {
     try {
       const config = await loadConfig(true);
@@ -709,6 +713,10 @@ async function refreshInventoryFromConfig() {
     }
   })().finally(() => {
     _inventoryRefreshRequest = null;
+    if (_inventoryRefreshPending) {
+      _inventoryRefreshPending = false;
+      refreshInventoryFromConfig();
+    }
   });
   return _inventoryRefreshRequest;
 }
