@@ -256,7 +256,7 @@ const INVENTORY_REFRESH_DEBOUNCE_MS = 1500;
 
 async function loadConfig(forceRefresh = false) {
   if (_config && !forceRefresh) return _config;
-  if (_configRequest && !forceRefresh) return _configRequest;
+  if (_configRequest) return _configRequest;
   const requestUrl = `cloudinary-config.json?v=${Date.now()}`;
   _configRequest = fetch(requestUrl, { cache: 'no-store' })
     .then(async response => {
@@ -814,6 +814,7 @@ async function refreshInventoryFromConfig() {
         await renderInventoryFromConfig(config);
       } catch (error) {
         console.error('Inventory refresh error:', error);
+        throw error;
       } finally {
         _lastInventoryRefreshAt = Date.now();
       }
