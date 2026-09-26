@@ -72,6 +72,8 @@
 // ===== IMAGE LOADING FROM cloudinary-config.json =====
 
 let _config = null;
+let _configRequest = null;
+let _inventoryRefreshRequest = null;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
 let _skipNextHashChange = false;
@@ -79,11 +81,21 @@ const _loadedImageUrls = new Set();
 const _imagePreloadPromises = new Map();
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-async function loadConfig() {
-  if (_config) return _config;
-  const response = await fetch('cloudinary-config.json');
-  _config = await response.json();
-  return _config;
+async function loadConfig(forceRefresh = false) {
+  if (_config && !forceRefresh) return _config;
+  if (_configRequest && !forceRefresh) return _configRequest;
+  const requestUrl = `cloudinary-config.json?v=${Date.now()}`;
+  _configRequest = fetch(requestUrl, { cache: 'no-store' })
+    .then(async response => {
+      if (!response.ok) throw new Error(`Config load failed: ${response.status}`);
+      const nextConfig = await response.json();
+      _config = nextConfig;
+      return nextConfig;
+    })
+    .finally(() => {
+      _configRequest = null;
+    });
+  return _configRequest;
 }
 
 function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
@@ -388,9 +400,21 @@ async function loadPortfolio(config) {
 async function loadSoldBuilds(config) {
   try {
     const carousel = document.getElementById('sold-builds-carousel');
-    const track    = document.getElementById('sold-builds-track');
-    const dotsWrap = document.getElementById('sold-builds-dots');
-    if (!carousel || !track) return;
+    if (!carousel) return;
+    carousel.style.display = 'none';
+    carousel.innerHTML = `
+      <div class="ge-sold-track-wrap">
+        <div class="ge-sold-track"></div>
+      </div>
+      <div class="ge-sold-nav">
+        <button class="ge-sold-prev" aria-label="Previous build">&#8249;</button>
+        <div class="ge-sold-dots"></div>
+        <button class="ge-sold-next" aria-label="Next build">&#8250;</button>
+      </div>
+    `;
+    const track = carousel.querySelector('.ge-sold-track');
+    const dotsWrap = carousel.querySelector('.ge-sold-dots');
+    if (!track || !dotsWrap) return;
 
     const machines = Object.entries(config.images.machines)
       .map(([id, m]) => ({ id, ...m }))
@@ -400,9 +424,12 @@ async function loadSoldBuilds(config) {
 
     const decks = [];
     for (const machine of machines) {
+      const machineId = String(machine.id);
+      const machineToken = encodeURIComponent(machineId);
       const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
       if (images.length === 0) continue;
-      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
+      _machineIdByToken[machineToken] = machineId;
+      _machineSpecs[machineId] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
       decks.push({ machine, images });
     }
 
@@ -412,11 +439,15 @@ async function loadSoldBuilds(config) {
 
     function buildCard(deck, idx) {
       const { machine, images } = deck;
+      const machineId = String(machine.id);
+      const machineToken = encodeURIComponent(machineId);
+      const titleAttr = escapeHtmlAttribute(machine.title || machine.id);
+      const titleText = escapeHtmlText(machine.title || machine.id);
       const mainImg = images[0];
       const thumbsHtml = images.map((img, ti) => `
-        <button class="ge-thumb-btn ge-sold-thumb-btn" data-sold-machine="${machine.id}" data-idx="${ti}"
+        <button class="ge-thumb-btn ge-sold-thumb-btn" data-sold-machine-token="${machineToken}" data-idx="${ti}"
           style="flex:none;width:48px;height:48px;padding:0;border:2px solid ${ti === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${ti + 1}" decoding="async" loading="lazy">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${titleAttr} thumbnail ${ti + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
 
@@ -425,19 +456,19 @@ async function loadSoldBuilds(config) {
       card.setAttribute('data-card', idx);
       card.innerHTML = `
         <div style="position:relative;">
-          <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-            <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
-          </div>
+          <button type="button" class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" aria-label="Open details for ${titleAttr}" style="display:block;width:100%;padding:0;border:none;background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;text-align:inherit;">
+            <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+          </button>
           <div style="position:absolute;top:12px;left:12px;">
             <span class="ge-badge ge-badge--solid" style="background:var(--ink-700);color:var(--ink-300);">
               <span class="ge-badge__dot" style="background:var(--ink-400);box-shadow:none;"></span>Not for sale
             </span>
           </div>
         </div>
-        <h3 style="margin:16px 0 4px;font-size:18px;font-weight:600;color:#fff;">${machine.title}</h3>
+        <h3 style="margin:16px 0 4px;font-size:18px;font-weight:600;color:#fff;">${titleText}</h3>
         <p style="margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-400);">Portfolio build · sold</p>
         <div style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px;">${thumbsHtml}</div>
-        <button class="ge-btn ge-btn--dark ge-btn--sm ge-details-btn" data-machine-id="${machine.id}"
+        <button class="ge-btn ge-btn--dark ge-btn--sm ge-details-btn" data-machine-token="${machineToken}"
           style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
       `;
       return card;
@@ -466,8 +497,8 @@ async function loadSoldBuilds(config) {
       dots.forEach((d, i) => d.style.background = i === current ? 'var(--volt-400)' : 'var(--ink-600)');
     }
 
-    carousel.querySelector('.ge-sold-prev').addEventListener('click', () => goTo(current - 1));
-    carousel.querySelector('.ge-sold-next').addEventListener('click', () => goTo(current + 1));
+    carousel.querySelector('.ge-sold-prev')?.addEventListener('click', () => goTo(current - 1));
+    carousel.querySelector('.ge-sold-next')?.addEventListener('click', () => goTo(current + 1));
 
     let touchStartX = 0;
     track.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
@@ -479,13 +510,14 @@ async function loadSoldBuilds(config) {
     track.addEventListener('click', function(e) {
       const btn = e.target.closest('.ge-sold-thumb-btn');
       if (!btn) return;
-      const machId = btn.getAttribute('data-sold-machine');
+      const machineToken = btn.getAttribute('data-sold-machine-token');
       const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
-      const deck = decks.find(d => d.machine.id === machId);
+      const machineId = machineToken ? _machineIdByToken[machineToken] : null;
+      const deck = decks.find(d => String(d.machine.id) === machineId);
       if (!deck) return;
-      const mainEl = document.getElementById(`${machId}-main`);
+      const mainEl = document.getElementById(`${machineToken}-main`);
       if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
-      track.querySelectorAll(`[data-sold-machine="${machId}"]`).forEach(b => b.style.borderColor = 'transparent');
+      track.querySelectorAll(`[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
       btn.style.borderColor = '#00ffcc';
     });
 
@@ -494,6 +526,23 @@ async function loadSoldBuilds(config) {
   } catch (e) {
     console.error('Sold builds carousel error:', e);
   }
+}
+
+async function refreshInventoryFromConfig() {
+  if (_inventoryRefreshRequest) return _inventoryRefreshRequest;
+  _inventoryRefreshRequest = (async () => {
+    try {
+      const config = await loadConfig(true);
+      await loadMachines(config);
+      await loadSoldBuilds(config);
+      queueHeaderToneUpdate();
+    } catch (error) {
+      console.error('Inventory refresh error:', error);
+    }
+  })().finally(() => {
+    _inventoryRefreshRequest = null;
+  });
+  return _inventoryRefreshRequest;
 }
 
 // ===== PC DETAIL MODAL =====
@@ -708,6 +757,10 @@ document.addEventListener('DOMContentLoaded', async function() {
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('hashchange', handleHashAnchors);
+  window.addEventListener('focus', () => { refreshInventoryFromConfig(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshInventoryFromConfig();
+  });
   initSmoothSectionLinks();
   handleHashAnchors();
   queueHeaderToneUpdate();
