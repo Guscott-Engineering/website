@@ -388,10 +388,15 @@ async function loadMachines(config) {
     const container = document.getElementById('machines-container');
     if (!container) return;
     container.innerHTML = '';
+    Object.keys(_machineIdByToken).forEach(key => delete _machineIdByToken[key]);
+    Object.keys(_machineSpecs).forEach(key => delete _machineSpecs[key]);
     const machines = Object.entries(config.images.machines)
       .map(([id, m]) => ({ id, ...m }))
       .filter(machine => !machine.sold);
-    if (machines.length === 0) return;
+    if (machines.length === 0) {
+      if (availSection) availSection.style.display = 'none';
+      return;
+    }
     let renderedCount = 0;
     const machineDecks = await Promise.all(
       machines.map(async machine => ({
