@@ -12,7 +12,7 @@
       "about-workdesk": {
         "tag": "about",
         "fallback": "images/workdesk.jpeg",
-        "alt": "Ayden's workbench â open case and tools on the desk"
+        "alt": "Ayden's workbench Ã¢ÂÂ open case and tools on the desk"
       }
     },
     "machines": {
@@ -62,10 +62,10 @@
         }
       },
       "m4": {
-        "tag": "PC4", "title": "Custom PC Workstation 04", "price": "$1200", "sold": true,
         "tag": "PC4",
         "title": "Custom PC Workstation 04",
         "price": "$1200",
+        "sold": true,
         "specs": {
           "CPU": "AMD Ryzen 7 5800X",
           "GPU": "AMD RX 6700 XT",
@@ -75,8 +75,7 @@
           "Cooling": "360 mm AIO",
           "Case": "Full-Tower ATX",
           "OS": "Windows 11 Pro"
-        },
-        "sold": true
+        }
       },
       "m5": {
         "tag": "PC5",
@@ -91,7 +90,8 @@
           "Cooling": "360 mm AIO",
           "Case": "Full-Tower ATX",
           "OS": "Windows 11 Pro"
-        }
+        },
+        "sold": true
       }
     },
     "portfolio": {
