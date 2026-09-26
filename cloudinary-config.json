@@ -12,7 +12,7 @@
       "about-workdesk": {
         "tag": "about",
         "fallback": "images/workdesk.jpeg",
-        "alt": "Ayden's workbench ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ open case and tools on the desk"
+        "alt": "Ayden's workbench ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ open case and tools on the desk"
       }
     },
     "machines": {
@@ -43,7 +43,8 @@
           "Storage": "1 TB High-Speed SSD",
           "Motherboard": "MSI B450 TOMAHAWK",
           "OS": "Windows 11 (Fresh Install)"
-        }
+        },
+        "sold": true
       },
       "m3": {
         "tag": "PC3",
