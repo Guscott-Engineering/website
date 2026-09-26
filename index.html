@@ -722,6 +722,13 @@ async function loadSoldBuilds(config) {
   }
 }
 
+async function renderInventoryFromConfig(config) {
+  await loadMachines(config);
+  await loadSoldBuilds(config);
+  queueHeaderToneUpdate();
+  return config;
+}
+
 async function refreshInventoryFromConfig() {
   if (_inventoryRefreshRequest) {
     _inventoryRefreshPending = true;
@@ -733,9 +740,7 @@ async function refreshInventoryFromConfig() {
       _lastInventoryRefreshStartedAt = Date.now();
       try {
         const config = await loadConfig(true);
-        await loadMachines(config);
-        await loadSoldBuilds(config);
-        queueHeaderToneUpdate();
+        await renderInventoryFromConfig(config);
       } catch (error) {
         console.error('Inventory refresh error:', error);
       } finally {
@@ -757,7 +762,7 @@ function requestInventoryRefresh(minIntervalMs = 0) {
   }
   if (!_config) return refreshInventoryFromConfig();
   if (_lastInventoryRefreshAt && Date.now() - _lastInventoryRefreshAt < minIntervalMs) {
-    return Promise.resolve(_config);
+    return renderInventoryFromConfig(_config);
   }
   return refreshInventoryFromConfig();
 }
