@@ -79,6 +79,7 @@ let _inventoryRefreshRequest = null;
 let _inventoryRefreshPending = false;
 let _scheduledInventoryRefresh = null;
 let _scheduledInventoryRefreshTimer = null;
+let _scheduledInventoryRefreshDueAt = 0;
 let _scheduledInventoryRefreshResolve = null;
 let _scheduledInventoryRefreshReject = null;
 let _initialBootstrapRequest = null;
@@ -630,9 +631,11 @@ function scheduleInventoryRefresh(delayMs) {
     _scheduledInventoryRefreshResolve = null;
     _scheduledInventoryRefreshReject = null;
     _scheduledInventoryRefreshTimer = null;
+    _scheduledInventoryRefreshDueAt = 0;
     _scheduledInventoryRefresh = null;
     refreshInventoryFromConfig().then(resolve, reject);
   }, delayMs);
+  _scheduledInventoryRefreshDueAt = Date.now() + delayMs;
   return _scheduledInventoryRefresh;
 }
 
@@ -642,6 +645,7 @@ function flushScheduledInventoryRefresh() {
   }
   if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
   _scheduledInventoryRefreshTimer = null;
+  _scheduledInventoryRefreshDueAt = 0;
   const resolve = _scheduledInventoryRefreshResolve;
   const reject = _scheduledInventoryRefreshReject;
   _scheduledInventoryRefreshResolve = null;
@@ -690,13 +694,21 @@ function requestInventoryRefresh(minIntervalMs = 0) {
     return _inventoryRefreshRequest;
   }
   if (!_config) return refreshInventoryFromConfig();
-  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   if (_lastInventoryRefreshAt) {
     const elapsed = Date.now() - _lastInventoryRefreshAt;
+    if (_scheduledInventoryRefresh) {
+      const remainingDelay = Math.max(0, _scheduledInventoryRefreshDueAt - Date.now());
+      const desiredDelay = Math.max(0, minIntervalMs - elapsed);
+      if (desiredDelay > remainingDelay) {
+        return scheduleInventoryRefresh(desiredDelay);
+      }
+      return _scheduledInventoryRefresh;
+    }
     if (elapsed < minIntervalMs) {
       return scheduleInventoryRefresh(minIntervalMs - elapsed);
     }
   }
+  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   return refreshInventoryFromConfig();
 }
 
