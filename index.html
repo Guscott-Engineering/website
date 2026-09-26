@@ -809,11 +809,11 @@ async function refreshInventoryFromConfig() {
 
 function requestInventoryRefresh(minIntervalMs = 0) {
   if (!_hasCompletedInitialConfigBootstrap) return bootstrapSiteFromConfig(true);
-  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   if (_inventoryRefreshRequest) {
     _inventoryRefreshPending = true;
     return _inventoryRefreshRequest;
   }
+  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   if (!_config) return refreshInventoryFromConfig();
   if (_lastInventoryRefreshAt) {
     const elapsed = Date.now() - _lastInventoryRefreshAt;
