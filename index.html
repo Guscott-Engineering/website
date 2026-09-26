@@ -240,6 +240,7 @@ let _inventoryRefreshPending = false;
 let _scheduledInventoryRefresh = null;
 let _scheduledInventoryRefreshTimer = null;
 let _scheduledInventoryRefreshResolve = null;
+let _scheduledInventoryRefreshReject = null;
 let _initialBootstrapRequest = null;
 let _hasCompletedInitialConfigBootstrap = false;
 let _bootstrapNeedsForceRefresh = false;
@@ -769,16 +770,19 @@ async function bootstrapSiteFromConfig(forceRefresh = false) {
 function scheduleInventoryRefresh(delayMs) {
   if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
   if (!_scheduledInventoryRefresh) {
-    _scheduledInventoryRefresh = new Promise(resolve => {
+    _scheduledInventoryRefresh = new Promise((resolve, reject) => {
       _scheduledInventoryRefreshResolve = resolve;
+      _scheduledInventoryRefreshReject = reject;
     });
   }
   _scheduledInventoryRefreshTimer = setTimeout(async () => {
     const resolve = _scheduledInventoryRefreshResolve;
+    const reject = _scheduledInventoryRefreshReject;
     _scheduledInventoryRefreshResolve = null;
+    _scheduledInventoryRefreshReject = null;
     _scheduledInventoryRefreshTimer = null;
     _scheduledInventoryRefresh = null;
-    resolve(await refreshInventoryFromConfig());
+    refreshInventoryFromConfig().then(resolve, reject);
   }, delayMs);
   return _scheduledInventoryRefresh;
 }
@@ -787,10 +791,12 @@ function flushScheduledInventoryRefresh() {
   if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
   _scheduledInventoryRefreshTimer = null;
   const resolve = _scheduledInventoryRefreshResolve;
+  const reject = _scheduledInventoryRefreshReject;
   _scheduledInventoryRefreshResolve = null;
+  _scheduledInventoryRefreshReject = null;
   _scheduledInventoryRefresh = null;
   const immediateRefresh = refreshInventoryFromConfig();
-  if (resolve) immediateRefresh.then(resolve);
+  if (resolve || reject) immediateRefresh.then(resolve, reject);
   return immediateRefresh;
 }
 
