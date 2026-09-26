@@ -799,6 +799,9 @@ function scheduleInventoryRefresh(delayMs) {
 }
 
 function flushScheduledInventoryRefresh() {
+  if (!_scheduledInventoryRefresh) {
+    return _inventoryRefreshRequest || Promise.resolve(_config);
+  }
   if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
   _scheduledInventoryRefreshTimer = null;
   const resolve = _scheduledInventoryRefreshResolve;
