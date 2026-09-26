@@ -76,6 +76,7 @@ let _configRequest = null;
 let _inventoryRefreshRequest = null;
 let _inventoryRefreshPending = false;
 let _lastInventoryRefreshAt = 0;
+let _lastInventoryRefreshStartedAt = 0;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
 let _skipNextHashChange = false;
@@ -567,6 +568,7 @@ async function refreshInventoryFromConfig() {
   _inventoryRefreshRequest = (async () => {
     do {
       _inventoryRefreshPending = false;
+      _lastInventoryRefreshStartedAt = Date.now();
       try {
         const config = await loadConfig(true);
         await loadMachines(config);
@@ -585,7 +587,12 @@ async function refreshInventoryFromConfig() {
 }
 
 function requestInventoryRefresh(minIntervalMs = 0) {
-  if (_inventoryRefreshRequest) return refreshInventoryFromConfig();
+  if (_inventoryRefreshRequest) {
+    if (_lastInventoryRefreshStartedAt && Date.now() - _lastInventoryRefreshStartedAt < minIntervalMs) {
+      return _inventoryRefreshRequest;
+    }
+    return refreshInventoryFromConfig();
+  }
   if (!_config) return refreshInventoryFromConfig();
   if (_lastInventoryRefreshAt && Date.now() - _lastInventoryRefreshAt < minIntervalMs) {
     return Promise.resolve(_config);
