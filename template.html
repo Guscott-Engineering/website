@@ -571,10 +571,11 @@ async function refreshInventoryFromConfig() {
         const config = await loadConfig(true);
         await loadMachines(config);
         await loadSoldBuilds(config);
-        _lastInventoryRefreshAt = Date.now();
         queueHeaderToneUpdate();
       } catch (error) {
         console.error('Inventory refresh error:', error);
+      } finally {
+        _lastInventoryRefreshAt = Date.now();
       }
     } while (_inventoryRefreshPending);
   })().finally(() => {
