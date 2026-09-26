@@ -492,9 +492,9 @@ async function loadSoldBuilds(config) {
       decks.forEach((_, i) => {
         const dot = document.createElement('button');
         dot.className = 'ge-sold-dot';
+        dot.setAttribute('data-sold-dot', String(i));
         dot.setAttribute('aria-label', `Go to build ${i + 1}`);
         dot.style.cssText = `width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer;background:${i === 0 ? 'var(--volt-400)' : 'var(--ink-600)'};transition:background .2s,transform .15s;`;
-        dot.addEventListener('click', () => goTo(i));
         dotsWrap.appendChild(dot);
         dots.push(dot);
       });
@@ -502,33 +502,55 @@ async function loadSoldBuilds(config) {
 
     function goTo(idx) {
       current = ((idx % decks.length) + decks.length) % decks.length;
+      carousel._soldCurrent = current;
       track.style.transform = `translateX(calc(${current} * (var(--ge-sold-card-w) + 24px) * -1))`;
       dots.forEach((d, i) => d.style.background = i === current ? 'var(--volt-400)' : 'var(--ink-600)');
     }
 
-    carousel.querySelector('.ge-sold-prev')?.addEventListener('click', () => goTo(current - 1));
-    carousel.querySelector('.ge-sold-next')?.addEventListener('click', () => goTo(current + 1));
+    carousel._soldDecks = decks;
+    carousel._soldGoTo = goTo;
+    carousel._soldCurrent = current;
+    carousel._soldTouchStartX = 0;
 
-    let touchStartX = 0;
-    track.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
-    }, { passive: true });
-
-    track.addEventListener('click', function(e) {
-      const btn = e.target.closest('.ge-sold-thumb-btn');
-      if (!btn) return;
-      const machineToken = btn.getAttribute('data-sold-machine-token');
-      const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
-      const machineId = machineToken ? _machineIdByToken[machineToken] : null;
-      const deck = decks.find(d => String(d.machine.id) === machineId);
-      if (!deck) return;
-      const mainEl = document.getElementById(getMachineMainImageId(machineId));
-      if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
-      track.querySelectorAll(`[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
-      btn.style.borderColor = '#00ffcc';
-    });
+    if (!carousel.dataset.boundInteractions) {
+      carousel.dataset.boundInteractions = 'true';
+      carousel.addEventListener('click', function(e) {
+        const prevBtn = e.target.closest('.ge-sold-prev');
+        if (prevBtn) {
+          this._soldGoTo?.((this._soldCurrent || 0) - 1);
+          return;
+        }
+        const nextBtn = e.target.closest('.ge-sold-next');
+        if (nextBtn) {
+          this._soldGoTo?.((this._soldCurrent || 0) + 1);
+          return;
+        }
+        const dotBtn = e.target.closest('[data-sold-dot]');
+        if (dotBtn) {
+          const dotIdx = parseInt(dotBtn.getAttribute('data-sold-dot'), 10);
+          if (!Number.isNaN(dotIdx)) this._soldGoTo?.(dotIdx);
+          return;
+        }
+        const btn = e.target.closest('.ge-sold-thumb-btn');
+        if (!btn) return;
+        const machineToken = btn.getAttribute('data-sold-machine-token');
+        const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
+        const machineId = machineToken ? _machineIdByToken[machineToken] : null;
+        const deck = this._soldDecks?.find(d => String(d.machine.id) === machineId);
+        if (!deck) return;
+        const mainEl = document.getElementById(getMachineMainImageId(machineId));
+        if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
+        this.querySelectorAll(`[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
+        btn.style.borderColor = '#00ffcc';
+      });
+      carousel.addEventListener('touchstart', function(e) {
+        this._soldTouchStartX = e.changedTouches[0].clientX;
+      }, { passive: true });
+      carousel.addEventListener('touchend', function(e) {
+        const dx = e.changedTouches[0].clientX - (this._soldTouchStartX || 0);
+        if (Math.abs(dx) > 40) this._soldGoTo?.(dx < 0 ? (this._soldCurrent || 0) + 1 : (this._soldCurrent || 0) - 1);
+      }, { passive: true });
+    }
 
     carousel.style.display = '';
     goTo(0);
