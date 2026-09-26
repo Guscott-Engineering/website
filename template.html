@@ -121,6 +121,10 @@ function escapeHtmlAttribute(value) {
   return escapeHtmlText(value);
 }
 
+function getMachineMainImageId(machineId) {
+  return `machine-main-${String(machineId).replace(/[^a-zA-Z0-9_-]/g, char => `_${char.codePointAt(0).toString(16)}`)}`;
+}
+
 async function fetchCloudinaryImages(cloudName, tag) {
   try {
     const response = await fetch(
@@ -258,6 +262,7 @@ async function loadMachines(config) {
     for (const { machine, images } of machineDecks) {
       const machineId = String(machine.id);
       const machineToken = encodeURIComponent(machineId);
+      const machineMainImageId = getMachineMainImageId(machineId);
       const rawTitle = String(machine.title || machine.id);
       const titleText = escapeHtmlText(rawTitle);
       const titleAttr = escapeHtmlAttribute(rawTitle);
@@ -277,7 +282,7 @@ async function loadMachines(config) {
       const mediaHtml = images.length > 0
         ? `
             <button type="button" class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" aria-label="Open details for ${titleAttr}" style="display:block;width:100%;padding:0;border:none;background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;text-align:inherit;">
-              <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machineMainImageId}" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
             </button>
           `
         : `
@@ -312,7 +317,7 @@ async function loadMachines(config) {
       document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(btn => {
         btn.addEventListener('click', function() {
           const idx = parseInt(this.getAttribute('data-idx'));
-          const mainEl = document.getElementById(`${machineToken}-main`);
+          const mainEl = document.getElementById(machineMainImageId);
           if (mainEl && images[idx]) swapImageSource(mainEl, images[idx].secure_url);
           document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(b => {
             b.style.borderColor = 'transparent';
@@ -441,6 +446,7 @@ async function loadSoldBuilds(config) {
       const { machine, images } = deck;
       const machineId = String(machine.id);
       const machineToken = encodeURIComponent(machineId);
+      const machineMainImageId = getMachineMainImageId(machineId);
       const titleAttr = escapeHtmlAttribute(machine.title || machine.id);
       const titleText = escapeHtmlText(machine.title || machine.id);
       const mainImg = images[0];
@@ -457,7 +463,7 @@ async function loadSoldBuilds(config) {
       card.innerHTML = `
         <div style="position:relative;">
           <button type="button" class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" aria-label="Open details for ${titleAttr}" style="display:block;width:100%;padding:0;border:none;background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;text-align:inherit;">
-            <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+            <img class="ge-cloudinary-image ge-machine-main" id="${machineMainImageId}" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
           </button>
           <div style="position:absolute;top:12px;left:12px;">
             <span class="ge-badge ge-badge--solid" style="background:var(--ink-700);color:var(--ink-300);">
@@ -515,7 +521,7 @@ async function loadSoldBuilds(config) {
       const machineId = machineToken ? _machineIdByToken[machineToken] : null;
       const deck = decks.find(d => String(d.machine.id) === machineId);
       if (!deck) return;
-      const mainEl = document.getElementById(`${machineToken}-main`);
+      const mainEl = document.getElementById(getMachineMainImageId(machineId));
       if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
       track.querySelectorAll(`[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
       btn.style.borderColor = '#00ffcc';
@@ -557,7 +563,7 @@ function openMachineModal(machineId) {
   const modalImg = document.getElementById('ge-modal-img');
   setImageHints(modalImg, { loading: 'eager', fetchPriority: 'high' });
   const imgWrap = document.getElementById('ge-modal-img-wrap');
-  const mainEl = document.getElementById(`${machineId}-main`);
+  const mainEl = document.getElementById(getMachineMainImageId(machineId));
   const hasImages = Array.isArray(data.images) && data.images.length > 0;
   const activeUrl = mainEl?.src || (hasImages ? data.images[0].secure_url : '');
   if (modalImg && hasImages && activeUrl) {
