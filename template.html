@@ -73,6 +73,8 @@
 
 let _config = null;
 let _configRequest = null;
+let _configRequestForce = false;
+let _configRequestGeneration = 0;
 let _inventoryRefreshRequest = null;
 let _inventoryRefreshPending = false;
 let _scheduledInventoryRefresh = null;
@@ -94,19 +96,27 @@ const INVENTORY_REFRESH_DEBOUNCE_MS = 1500;
 
 async function loadConfig(forceRefresh = false) {
   if (_config && !forceRefresh) return _config;
-  if (_configRequest) return _configRequest;
+  if (_configRequest && (!forceRefresh || _configRequestForce)) return _configRequest;
   const requestUrl = `cloudinary-config.json?v=${Date.now()}`;
-  _configRequest = fetch(requestUrl, { cache: 'no-store' })
+  const generation = ++_configRequestGeneration;
+  _configRequestForce = forceRefresh;
+  const request = fetch(requestUrl, { cache: 'no-store' })
     .then(async response => {
       if (!response.ok) throw new Error(`Config load failed: ${response.status}`);
       const nextConfig = await response.json();
-      _config = nextConfig;
+      if (generation === _configRequestGeneration) {
+        _config = nextConfig;
+      }
       return nextConfig;
     })
     .finally(() => {
-      _configRequest = null;
+      if (_configRequest === request) {
+        _configRequest = null;
+        _configRequestForce = false;
+      }
     });
-  return _configRequest;
+  _configRequest = request;
+  return request;
 }
 
 function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
@@ -650,11 +660,10 @@ async function refreshInventoryFromConfig() {
       try {
         const config = await loadConfig(true);
         await renderInventoryFromConfig(config);
+        _lastInventoryRefreshAt = Date.now();
       } catch (error) {
         console.error('Inventory refresh error:', error);
         throw error;
-      } finally {
-        _lastInventoryRefreshAt = Date.now();
       }
     } while (_inventoryRefreshPending);
   })().finally(() => {
