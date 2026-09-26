@@ -70,6 +70,10 @@
     padding:3px 10px;border-radius:20px}
   .col-available .col-header h2{color:var(--volt)}
   .col-portfolio .col-header h2{color:var(--text2)}
+  .column-hint{color:var(--text3);font-size:.74rem;font-family:var(--mono);margin:-8px 0 14px}
+  .machine-list{min-height:120px;border:1px dashed transparent;border-radius:var(--radius);transition:border-color .2s,background .2s}
+  .machine-list.drop-target{border-color:var(--volt);background:rgba(204,255,0,.05)}
+  .machine-list.drop-disabled{border-color:rgba(255,255,255,.08)}
   .empty-state{color:var(--text3);font-size:.84rem;font-family:var(--mono);padding:28px;
     text-align:center;border:1px dashed var(--border);border-radius:var(--radius)}
 
@@ -77,6 +81,8 @@
   .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
     padding:20px 22px;margin-bottom:14px;transition:border-color .2s}
   .card:hover{border-color:var(--bg4)}
+  .card[draggable="true"]{cursor:grab}
+  .card.dragging{opacity:.55;border-color:var(--volt)}
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
   .card-title{font-family:var(--mono);font-size:.95rem;font-weight:600;color:var(--text)}
   .card-tag{font-family:var(--mono);font-size:.68rem;color:var(--volt);background:var(--volt-bg);
@@ -203,14 +209,16 @@
         <h2>Available Machines</h2>
         <span class="badge" id="available-count">0</span>
       </div>
-      <div id="available-list"></div>
+      <div class="column-hint">Drag cards here to make them live on the site.</div>
+      <div id="available-list" class="machine-list"></div>
     </div>
     <div class="column col-portfolio">
       <div class="col-header">
         <h2>Portfolio (Sold)</h2>
         <span class="badge" id="portfolio-count">0</span>
       </div>
-      <div id="portfolio-list"></div>
+      <div class="column-hint">Drag cards here to archive them as sold builds.</div>
+      <div id="portfolio-list" class="machine-list"></div>
     </div>
   </div>
 
@@ -247,6 +255,8 @@ const API_BASE = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
 let config = null;
 let fileSha = null;
 let busy = false;
+let dragMachineKey = null;
+let dragMachineSold = null;
 
 /* ── Helpers ── */
 function getPAT() { return sessionStorage.getItem('gh_pat') || ''; }
@@ -367,6 +377,13 @@ document.getElementById('pat-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') handleLogin();
 });
 
+document.getElementById('available-list').addEventListener('dragover', e => handleColumnDragOver(e, false));
+document.getElementById('available-list').addEventListener('dragleave', handleColumnDragLeave);
+document.getElementById('available-list').addEventListener('drop', e => handleColumnDrop(e, false));
+document.getElementById('portfolio-list').addEventListener('dragover', e => handleColumnDragOver(e, true));
+document.getElementById('portfolio-list').addEventListener('dragleave', handleColumnDragLeave);
+document.getElementById('portfolio-list').addEventListener('drop', e => handleColumnDrop(e, true));
+
 /* ── Render ── */
 function getMachines() {
   if (!config || !config.images || !config.images.machines) return {};
@@ -383,7 +400,9 @@ function renderCard(key, m, isSold) {
     }
   }
   return `
-    <div class="card ${isSold ? 'sold-card' : ''}">
+    <div class="card ${isSold ? 'sold-card' : ''}" draggable="true"
+      ondragstart="handleCardDragStart(event,'${key}',${isSold})"
+      ondragend="handleCardDragEnd()">
       <div class="card-top">
         <span class="card-title">${esc(m.title || key)}</span>
         <span class="card-tag">${esc(m.tag || '—')}</span>
@@ -418,9 +437,77 @@ function render() {
   document.getElementById('portfolio-list').innerHTML = portHTML || '<div class="empty-state">No sold machines yet</div>';
   document.getElementById('available-count').textContent = availCount;
   document.getElementById('portfolio-count').textContent = portCount;
+  setupDropzones();
 }
 
 /* ── Actions ── */
+function setDropzoneState(targetId, state) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.classList.toggle('drop-target', state === 'target');
+  el.classList.toggle('drop-disabled', state === 'disabled');
+}
+
+function clearDropzoneState() {
+  setDropzoneState('available-list', null);
+  setDropzoneState('portfolio-list', null);
+}
+
+function setupDropzones() {
+  const available = document.getElementById('available-list');
+  const portfolio = document.getElementById('portfolio-list');
+  if (!available || !portfolio) return;
+  available.dataset.soldTarget = 'false';
+  portfolio.dataset.soldTarget = 'true';
+}
+
+function handleCardDragStart(event, key, isSold) {
+  if (busy) {
+    event.preventDefault();
+    return;
+  }
+  dragMachineKey = key;
+  dragMachineSold = isSold;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', key);
+  event.currentTarget.classList.add('dragging');
+  setDropzoneState('available-list', isSold ? 'target' : 'disabled');
+  setDropzoneState('portfolio-list', isSold ? 'disabled' : 'target');
+}
+
+function handleCardDragEnd() {
+  dragMachineKey = null;
+  dragMachineSold = null;
+  document.querySelectorAll('.card.dragging').forEach(card => card.classList.remove('dragging'));
+  clearDropzoneState();
+}
+
+function handleColumnDragOver(event, toSold) {
+  if (busy || dragMachineKey === null) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = dragMachineSold === toSold ? 'none' : 'move';
+  setDropzoneState(toSold ? 'portfolio-list' : 'available-list', dragMachineSold === toSold ? 'disabled' : 'target');
+}
+
+function handleColumnDragLeave(event) {
+  const related = event.relatedTarget;
+  if (related && event.currentTarget.contains(related)) return;
+  if (dragMachineKey === null) return;
+  clearDropzoneState();
+  setDropzoneState('available-list', dragMachineSold ? 'target' : 'disabled');
+  setDropzoneState('portfolio-list', dragMachineSold ? 'disabled' : 'target');
+}
+
+async function handleColumnDrop(event, toSold) {
+  if (busy || dragMachineKey === null) return;
+  event.preventDefault();
+  const key = dragMachineKey;
+  const fromSold = dragMachineSold;
+  handleCardDragEnd();
+  if (fromSold === toSold) return;
+  await moveMachine(key, toSold);
+}
+
 async function refreshData() {
   if (busy) return;
   setLoading(true);
@@ -440,6 +527,10 @@ async function moveMachine(key, toSold) {
     await fetchConfig(getPAT());
     const m = config.images.machines[key];
     if (!m) throw new Error(`Machine ${key} not found`);
+    if ((m.sold === true) === toSold) {
+      showToast(`${m.title || key} is already in ${toSold ? 'Portfolio' : 'Available'}`);
+      return;
+    }
     if (toSold) { m.sold = true; } else { delete m.sold; }
     const verb = toSold ? 'sold' : 'available';
     await saveConfig(`admin: mark ${key} as ${verb}`);
