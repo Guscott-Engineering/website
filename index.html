@@ -391,10 +391,8 @@ async function loadMachines(config) {
     const machines = Object.entries(config.images.machines)
       .map(([id, m]) => ({ id, ...m }))
       .filter(machine => !machine.sold);
-    if (availSection) {
-      availSection.style.display = machines.length > 0 ? '' : 'none';
-    }
     if (machines.length === 0) return;
+    let renderedCount = 0;
     const machineDecks = await Promise.all(
       machines.map(async machine => ({
         machine,
@@ -454,6 +452,7 @@ async function loadMachines(config) {
             style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
         </div>
       `);
+      renderedCount++;
 
       document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(btn => {
         btn.addEventListener('click', function() {
@@ -466,6 +465,9 @@ async function loadMachines(config) {
           this.style.borderColor = '#00ffcc';
         });
       });
+    }
+    if (availSection) {
+      availSection.style.display = renderedCount > 0 ? '' : 'none';
     }
   } catch (e) {
     console.error('Machines load error:', e);
