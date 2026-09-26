@@ -768,6 +768,7 @@ async function bootstrapSiteFromConfig(forceRefresh = false) {
       await renderInventoryFromConfig(config);
       await loadPortfolio(config);
       _hasCompletedInitialConfigBootstrap = true;
+      _lastInventoryRefreshAt = Date.now();
       nextForceRefresh = _bootstrapNeedsForceRefresh;
     } while (nextForceRefresh);
     return config;
