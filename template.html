@@ -697,7 +697,9 @@ async function refreshInventoryFromConfig() {
 }
 
 function requestInventoryRefresh(minIntervalMs = 0) {
-  if (!_hasCompletedInitialConfigBootstrap) return bootstrapSiteFromConfig(true);
+  if (!_hasCompletedInitialConfigBootstrap) {
+    return _initialBootstrapRequest || bootstrapSiteFromConfig();
+  }
   if (_inventoryRefreshRequest) {
     _inventoryRefreshPending = true;
     return _inventoryRefreshRequest;
