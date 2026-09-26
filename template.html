@@ -563,6 +563,7 @@ async function refreshInventoryFromConfig() {
 
 function requestInventoryRefresh(minIntervalMs = 0) {
   if (_inventoryRefreshRequest) return refreshInventoryFromConfig();
+  if (!_config) return refreshInventoryFromConfig();
   if (_lastInventoryRefreshAt && Date.now() - _lastInventoryRefreshAt < minIntervalMs) {
     return Promise.resolve(_config);
   }
