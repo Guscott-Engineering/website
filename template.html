@@ -723,6 +723,7 @@ function requestInventoryRefresh(minIntervalMs = 0) {
   if (lastRefreshMarker) {
     const elapsed = Date.now() - lastRefreshMarker;
     if (_scheduledInventoryRefresh) {
+      if (minIntervalMs === 0) return flushScheduledInventoryRefresh();
       const remainingDelay = Math.max(0, _scheduledInventoryRefreshDueAt - Date.now());
       const desiredDelay = Math.max(0, minIntervalMs - elapsed);
       if (desiredDelay < remainingDelay) {
