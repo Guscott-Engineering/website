@@ -309,6 +309,13 @@ function getMachineMainImageId(machineId) {
   return `machine-main-${String(machineId).replace(/[^a-zA-Z0-9_-]/g, char => `_${char.codePointAt(0).toString(16)}`)}`;
 }
 
+function getMachineEntries(config) {
+  if (!config?.images || typeof config.images.machines !== 'object' || config.images.machines === null) {
+    throw new Error('Invalid config: missing images.machines');
+  }
+  return Object.entries(config.images.machines);
+}
+
 async function fetchCloudinaryImages(cloudName, tag) {
   try {
     const response = await fetch(
@@ -425,8 +432,9 @@ async function loadMachines(config) {
     const availSection = document.getElementById('available');
     const container = document.getElementById('machines-container');
     if (!container) return;
+    const machineEntries = getMachineEntries(config);
     container.innerHTML = '';
-    const machines = Object.entries(config.images.machines)
+    const machines = machineEntries
       .map(([id, m]) => ({ id, ...m }))
       .filter(machine => !machine.sold);
     if (machines.length === 0) {
@@ -595,6 +603,7 @@ async function loadSoldBuilds(config) {
   try {
     const carousel = document.getElementById('sold-builds-carousel');
     if (!carousel) return;
+    const machineEntries = getMachineEntries(config);
     carousel.style.display = 'none';
     carousel.innerHTML = `
       <div class="ge-sold-track-wrap">
@@ -610,7 +619,7 @@ async function loadSoldBuilds(config) {
     const dotsWrap = carousel.querySelector('.ge-sold-dots');
     if (!track || !dotsWrap) return;
 
-    const machines = Object.entries(config.images.machines)
+    const machines = machineEntries
       .map(([id, m]) => ({ id, ...m }))
       .filter(m => m.sold);
 
