@@ -95,7 +95,7 @@ function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
   return url;
 }
 
-function escapeHtml(value) {
+function escapeHtmlText(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;',
     '<': '&lt;',
@@ -103,6 +103,10 @@ function escapeHtml(value) {
     '"': '&quot;',
     "'": '&#39;',
   }[char]));
+}
+
+function escapeHtmlAttribute(value) {
+  return escapeHtmlText(value);
 }
 
 async function fetchCloudinaryImages(cloudName, tag) {
@@ -239,8 +243,10 @@ async function loadMachines(config) {
     for (const { machine, images } of machineDecks) {
       const machineId = String(machine.id);
       const machineToken = encodeURIComponent(machineId);
-      const title = escapeHtml(machine.title || machine.id);
-      const price = escapeHtml(machine.price || 'Contact for price');
+      const rawTitle = String(machine.title || machine.id);
+      const titleText = escapeHtmlText(rawTitle);
+      const titleAttr = escapeHtmlAttribute(rawTitle);
+      const priceText = escapeHtmlText(machine.price || 'Contact for price');
       const mainImg = images[0];
 
       // Store specs and full images array for the modal
@@ -250,19 +256,19 @@ async function loadMachines(config) {
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine-token="${machineToken}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${titleAttr} thumbnail ${idx + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
       const mediaHtml = images.length > 0
         ? `
             <div class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;">
-              <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
             </div>
           `
         : `
             <div class="ge-cut ge-machine-img-wrap" style="background:linear-gradient(135deg,var(--ink-950),var(--ink-850));aspect-ratio:16/9;padding:18px;">
               <div class="ge-slot" style="height:100%;background:rgba(255,255,255,.02);border-radius:8px;">
-                <span class="ge-slot__cap">Photos for ${title} coming soon</span>
+                <span class="ge-slot__cap">Photos for ${titleText} coming soon</span>
               </div>
             </div>
           `;
@@ -275,8 +281,8 @@ async function loadMachines(config) {
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
             </div>
           </div>
-          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${title}</h3>
-          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${price}</p>
+          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${titleText}</h3>
+          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${priceText}</p>
           ${thumbsHtml ? `
             <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
               ${thumbsHtml}
