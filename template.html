@@ -248,8 +248,6 @@ async function loadMachines(config) {
     const container = document.getElementById('machines-container');
     if (!container) return;
     container.innerHTML = '';
-    Object.keys(_machineIdByToken).forEach(key => delete _machineIdByToken[key]);
-    Object.keys(_machineSpecs).forEach(key => delete _machineSpecs[key]);
     const machines = Object.entries(config.images.machines)
       .map(([id, m]) => ({ id, ...m }))
       .filter(machine => !machine.sold);
@@ -563,6 +561,8 @@ async function loadSoldBuilds(config) {
 }
 
 async function renderInventoryFromConfig(config) {
+  Object.keys(_machineIdByToken).forEach(key => delete _machineIdByToken[key]);
+  Object.keys(_machineSpecs).forEach(key => delete _machineSpecs[key]);
   await loadMachines(config);
   await loadSoldBuilds(config);
   queueHeaderToneUpdate();
@@ -874,8 +874,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   try {
     const config = await loadConfig();
     await injectStaticImages(config);
-    await loadMachines(config);
-    await loadSoldBuilds(config);
+    await renderInventoryFromConfig(config);
     await loadPortfolio(config);
   } catch (e) {
     console.error('Failed to load cloudinary-config.json:', e);
