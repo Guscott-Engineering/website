@@ -254,7 +254,7 @@ async function loadMachines(config) {
 
       // Store specs and full images array for the modal
       _machineIdByToken[machineToken] = machineId;
-      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
+      _machineSpecs[machineId] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine-token="${machineToken}" data-idx="${idx}"
