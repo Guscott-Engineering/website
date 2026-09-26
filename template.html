@@ -237,6 +237,9 @@ async function loadMachines(config) {
     );
 
     for (const { machine, images } of machineDecks) {
+      const machineId = String(machine.id);
+      const machineIdAttr = escapeHtml(machineId);
+      const machineToken = encodeURIComponent(machineId);
       const title = escapeHtml(machine.title || machine.id);
       const price = escapeHtml(machine.price || 'Contact for price');
       const mainImg = images[0];
@@ -245,15 +248,15 @@ async function loadMachines(config) {
       _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
-        <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
+        <button class="ge-thumb-btn" data-machine-token="${machineToken}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
           <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
       const mediaHtml = images.length > 0
         ? `
-            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-              <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+            <div class="ge-cut ge-machine-img-wrap" data-open-machine-id="${machineIdAttr}" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
             </div>
           `
         : `
@@ -279,17 +282,17 @@ async function loadMachines(config) {
               ${thumbsHtml}
             </div>
           ` : ''}
-          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-id="${machine.id}"
+          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-id="${machineIdAttr}"
             style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
         </div>
       `);
 
-      document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(btn => {
+      document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(btn => {
         btn.addEventListener('click', function() {
           const idx = parseInt(this.getAttribute('data-idx'));
-          const mainEl = document.getElementById(`${machine.id}-main`);
+          const mainEl = document.getElementById(`${machineToken}-main`);
           if (mainEl && images[idx]) swapImageSource(mainEl, images[idx].secure_url);
-          document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
+          document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(b => {
             b.style.borderColor = 'transparent';
           });
           this.style.borderColor = '#00ffcc';
@@ -705,6 +708,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Details buttons (delegated — injected after config loads)
   document.addEventListener('click', function(e) {
+    const mediaTrigger = e.target.closest('[data-open-machine-id]');
+    if (mediaTrigger) {
+      openMachineModal(mediaTrigger.getAttribute('data-open-machine-id'));
+      return;
+    }
     const btn = e.target.closest('.ge-details-btn');
     if (btn) openMachineModal(btn.getAttribute('data-machine-id'));
   });
