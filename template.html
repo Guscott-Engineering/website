@@ -541,20 +541,19 @@ async function refreshInventoryFromConfig() {
     return _inventoryRefreshRequest;
   }
   _inventoryRefreshRequest = (async () => {
-    try {
-      const config = await loadConfig(true);
-      await loadMachines(config);
-      await loadSoldBuilds(config);
-      queueHeaderToneUpdate();
-    } catch (error) {
-      console.error('Inventory refresh error:', error);
-    }
+    do {
+      _inventoryRefreshPending = false;
+      try {
+        const config = await loadConfig(true);
+        await loadMachines(config);
+        await loadSoldBuilds(config);
+        queueHeaderToneUpdate();
+      } catch (error) {
+        console.error('Inventory refresh error:', error);
+      }
+    } while (_inventoryRefreshPending);
   })().finally(() => {
     _inventoryRefreshRequest = null;
-    if (_inventoryRefreshPending) {
-      _inventoryRefreshPending = false;
-      refreshInventoryFromConfig();
-    }
   });
   return _inventoryRefreshRequest;
 }
