@@ -12,7 +12,7 @@
       "about-workdesk": {
         "tag": "about",
         "fallback": "images/workdesk.jpeg",
-        "alt": "Ayden's workbench ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ open case and tools on the desk"
+        "alt": "Ayden's workbench ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ open case and tools on the desk"
       }
     },
     "machines": {
@@ -29,7 +29,8 @@
           "Cooling": "NZXT Kraken X53 240 mm AIO",
           "Case": "Lian Li LANCOOL II MESH Mid-Tower",
           "PSU": "850 W 80+ Gold"
-        }
+        },
+        "sold": true
       },
       "m2": {
         "tag": "PC2",
