@@ -264,7 +264,7 @@ async function loadMachines(config) {
             </div>
           `
         : `
-            <div class="ge-cut ge-machine-img-wrap" style="background:linear-gradient(135deg,var(--ink-950),var(--ink-850));aspect-ratio:16/9;padding:18px;">
+            <div class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" style="background:linear-gradient(135deg,var(--ink-950),var(--ink-850));aspect-ratio:16/9;padding:18px;cursor:pointer;">
               <div class="ge-slot" style="height:100%;background:rgba(255,255,255,.02);border-radius:8px;">
                 <span class="ge-slot__cap">Photos for ${titleText} coming soon</span>
               </div>
