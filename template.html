@@ -72,18 +72,53 @@
 // ===== IMAGE LOADING FROM cloudinary-config.json =====
 
 let _config = null;
+let _configRequest = null;
+let _configRequestForce = false;
+let _configRequestGeneration = 0;
+let _inventoryRefreshRequest = null;
+let _inventoryRefreshPending = false;
+let _scheduledInventoryRefresh = null;
+let _scheduledInventoryRefreshTimer = null;
+let _scheduledInventoryRefreshDueAt = 0;
+let _scheduledInventoryRefreshResolve = null;
+let _scheduledInventoryRefreshReject = null;
+let _initialBootstrapRequest = null;
+let _hasCompletedInitialConfigBootstrap = false;
+let _bootstrapNeedsForceRefresh = false;
+let _bootstrapDeferredRefreshMinInterval = 0;
+let _lastInventoryRefreshAt = 0;
+let _lastInventoryRefreshStartedAt = 0;
 let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
 let _skipNextHashChange = false;
 const _loadedImageUrls = new Set();
 const _imagePreloadPromises = new Map();
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const INVENTORY_REFRESH_DEBOUNCE_MS = 1500;
 
-async function loadConfig() {
-  if (_config) return _config;
-  const response = await fetch('cloudinary-config.json');
-  _config = await response.json();
-  return _config;
+async function loadConfig(forceRefresh = false) {
+  if (_config && !forceRefresh) return _config;
+  if (_configRequest && (!forceRefresh || _configRequestForce)) return _configRequest;
+  const requestUrl = `cloudinary-config.json?v=${Date.now()}`;
+  const generation = ++_configRequestGeneration;
+  _configRequestForce = forceRefresh;
+  const request = fetch(requestUrl, { cache: 'no-store' })
+    .then(async response => {
+      if (!response.ok) throw new Error(`Config load failed: ${response.status}`);
+      const nextConfig = await response.json();
+      if (generation === _configRequestGeneration) {
+        _config = nextConfig;
+      }
+      return nextConfig;
+    })
+    .finally(() => {
+      if (_configRequest === request) {
+        _configRequest = null;
+        _configRequestForce = false;
+      }
+    });
+  _configRequest = request;
+  return request;
 }
 
 function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
@@ -93,6 +128,31 @@ function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
   }
   url += `/${publicId}`;
   return url;
+}
+
+function escapeHtmlText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
+function escapeHtmlAttribute(value) {
+  return escapeHtmlText(value);
+}
+
+function getMachineMainImageId(machineId) {
+  return `machine-main-${String(machineId).replace(/[^a-zA-Z0-9_-]/g, char => `_${char.codePointAt(0).toString(16)}`)}`;
+}
+
+function getMachineEntries(config) {
+  if (!config?.images || typeof config.images.machines !== 'object' || config.images.machines === null) {
+    throw new Error('Invalid config: missing images.machines');
+  }
+  return Object.entries(config.images.machines);
 }
 
 async function fetchCloudinaryImages(cloudName, tag) {
@@ -208,12 +268,19 @@ async function injectStaticImages(config) {
 
 async function loadMachines(config) {
   try {
+    const availSection = document.getElementById('available');
     const container = document.getElementById('machines-container');
     if (!container) return;
-    const machines = Object.entries(config.images.machines)
+    const machineEntries = getMachineEntries(config);
+    container.innerHTML = '';
+    const machines = machineEntries
       .map(([id, m]) => ({ id, ...m }))
       .filter(machine => !machine.sold);
-    let hasAny = false;
+    if (machines.length === 0) {
+      if (availSection) availSection.style.display = 'none';
+      return;
+    }
+    let renderedCount = 0;
     const machineDecks = await Promise.all(
       machines.map(async machine => ({
         machine,
@@ -222,56 +289,81 @@ async function loadMachines(config) {
     );
 
     for (const { machine, images } of machineDecks) {
-      if (images.length === 0) continue;
-      hasAny = true;
+      const machineId = String(machine.id);
+      const machineToken = encodeURIComponent(machineId);
+      const machineMainImageId = getMachineMainImageId(machineId);
+      const rawTitle = String(machine.title || machine.id);
+      const titleText = escapeHtmlText(rawTitle);
+      const titleAttr = escapeHtmlAttribute(rawTitle);
+      const priceText = escapeHtmlText(machine.price || 'Contact for price');
       const mainImg = images[0];
 
       // Store specs and full images array for the modal
-      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
+      _machineIdByToken[machineToken] = machineId;
+      _machineSpecs[machineId] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
-        <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
+        <button class="ge-thumb-btn" data-machine-token="${machineToken}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${titleAttr} thumbnail ${idx + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
+      const mediaHtml = images.length > 0
+        ? `
+            <button type="button" class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" aria-label="Open details for ${titleAttr}" style="display:block;width:100%;padding:0;border:none;background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;text-align:inherit;">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machineMainImageId}" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+            </button>
+          `
+        : `
+            <button type="button" class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" aria-label="Open details for ${titleAttr}" style="display:block;width:100%;padding:18px;border:none;background:linear-gradient(135deg,var(--ink-950),var(--ink-850));aspect-ratio:16/9;cursor:pointer;text-align:inherit;">
+              <div class="ge-slot" style="height:100%;background:rgba(255,255,255,.02);border-radius:8px;">
+                <span class="ge-slot__cap">Photos for ${titleText} coming soon</span>
+              </div>
+            </button>
+          `;
 
       container.insertAdjacentHTML('beforeend', `
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
-            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-              <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
-            </div>
+            ${mediaHtml}
             <div style="position:absolute;top:12px;left:12px;">
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
             </div>
           </div>
-          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${machine.title}</h3>
-          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${machine.price}</p>
-          <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
-            ${thumbsHtml}
-          </div>
-          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-id="${machine.id}"
+          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${titleText}</h3>
+          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${priceText}</p>
+          ${thumbsHtml ? `
+            <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
+              ${thumbsHtml}
+            </div>
+          ` : ''}
+          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-token="${machineToken}"
             style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
         </div>
       `);
-
-      document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(btn => {
-        btn.addEventListener('click', function() {
-          const idx = parseInt(this.getAttribute('data-idx'));
-          const mainEl = document.getElementById(`${machine.id}-main`);
-          if (mainEl && images[idx]) swapImageSource(mainEl, images[idx].secure_url);
-          document.querySelectorAll(`[data-machine="${machine.id}"]`).forEach(b => {
-            b.style.borderColor = 'transparent';
-          });
-          this.style.borderColor = '#00ffcc';
-        });
-      });
+      renderedCount++;
     }
-
-    if (!hasAny) {
-      const availSection = document.getElementById('available');
-      if (availSection) availSection.style.display = 'none';
+    if (availSection) {
+      availSection.style.display = renderedCount > 0 ? '' : 'none';
+    }
+    if (!container.dataset.boundThumbInteractions) {
+      container.dataset.boundThumbInteractions = 'true';
+      container.addEventListener('click', function(e) {
+        const btn = e.target.closest('.ge-thumb-btn');
+        if (!btn) return;
+        const machineToken = btn.getAttribute('data-machine-token');
+        const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
+        const machineId = machineToken ? _machineIdByToken[machineToken] : null;
+        const machineData = machineId ? _machineSpecs[machineId] : null;
+        const mainEl = machineId ? document.getElementById(getMachineMainImageId(machineId)) : null;
+        if (mainEl && machineData?.images?.[imgIdx]) {
+          swapImageSource(mainEl, machineData.images[imgIdx].secure_url);
+        }
+        this.querySelectorAll(`.ge-thumb-btn[data-machine-token="${machineToken}"]`).forEach(thumb => {
+          thumb.style.borderColor = 'transparent';
+        });
+        btn.style.borderColor = '#00ffcc';
+      });
     }
   } catch (e) {
     console.error('Machines load error:', e);
@@ -349,11 +441,24 @@ async function loadPortfolio(config) {
 async function loadSoldBuilds(config) {
   try {
     const carousel = document.getElementById('sold-builds-carousel');
-    const track    = document.getElementById('sold-builds-track');
-    const dotsWrap = document.getElementById('sold-builds-dots');
-    if (!carousel || !track) return;
+    if (!carousel) return;
+    const machineEntries = getMachineEntries(config);
+    carousel.style.display = 'none';
+    carousel.innerHTML = `
+      <div class="ge-sold-track-wrap">
+        <div class="ge-sold-track"></div>
+      </div>
+      <div class="ge-sold-nav">
+        <button class="ge-sold-prev" aria-label="Previous build">&#8249;</button>
+        <div class="ge-sold-dots"></div>
+        <button class="ge-sold-next" aria-label="Next build">&#8250;</button>
+      </div>
+    `;
+    const track = carousel.querySelector('.ge-sold-track');
+    const dotsWrap = carousel.querySelector('.ge-sold-dots');
+    if (!track || !dotsWrap) return;
 
-    const machines = Object.entries(config.images.machines)
+    const machines = machineEntries
       .map(([id, m]) => ({ id, ...m }))
       .filter(m => m.sold);
 
@@ -361,9 +466,12 @@ async function loadSoldBuilds(config) {
 
     const decks = [];
     for (const machine of machines) {
+      const machineId = String(machine.id);
+      const machineToken = encodeURIComponent(machineId);
       const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
       if (images.length === 0) continue;
-      _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
+      _machineIdByToken[machineToken] = machineId;
+      _machineSpecs[machineId] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
       decks.push({ machine, images });
     }
 
@@ -373,11 +481,16 @@ async function loadSoldBuilds(config) {
 
     function buildCard(deck, idx) {
       const { machine, images } = deck;
+      const machineId = String(machine.id);
+      const machineToken = encodeURIComponent(machineId);
+      const machineMainImageId = getMachineMainImageId(machineId);
+      const titleAttr = escapeHtmlAttribute(machine.title || machine.id);
+      const titleText = escapeHtmlText(machine.title || machine.id);
       const mainImg = images[0];
       const thumbsHtml = images.map((img, ti) => `
-        <button class="ge-thumb-btn ge-sold-thumb-btn" data-sold-machine="${machine.id}" data-idx="${ti}"
+        <button class="ge-thumb-btn ge-sold-thumb-btn" data-sold-machine-token="${machineToken}" data-idx="${ti}"
           style="flex:none;width:48px;height:48px;padding:0;border:2px solid ${ti === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${ti + 1}" decoding="async" loading="lazy">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${titleAttr} thumbnail ${ti + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
 
@@ -386,19 +499,19 @@ async function loadSoldBuilds(config) {
       card.setAttribute('data-card', idx);
       card.innerHTML = `
         <div style="position:relative;">
-          <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-            <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
-          </div>
+          <button type="button" class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" aria-label="Open details for ${titleAttr}" style="display:block;width:100%;padding:0;border:none;background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;text-align:inherit;">
+            <img class="ge-cloudinary-image ge-machine-main" id="${machineMainImageId}" src="${mainImg.secure_url}" alt="${titleAttr}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+          </button>
           <div style="position:absolute;top:12px;left:12px;">
             <span class="ge-badge ge-badge--solid" style="background:var(--ink-700);color:var(--ink-300);">
               <span class="ge-badge__dot" style="background:var(--ink-400);box-shadow:none;"></span>Not for sale
             </span>
           </div>
         </div>
-        <h3 style="margin:16px 0 4px;font-size:18px;font-weight:600;color:#fff;">${machine.title}</h3>
+        <h3 style="margin:16px 0 4px;font-size:18px;font-weight:600;color:#fff;">${titleText}</h3>
         <p style="margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-400);">Portfolio build · sold</p>
         <div style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px;">${thumbsHtml}</div>
-        <button class="ge-btn ge-btn--dark ge-btn--sm ge-details-btn" data-machine-id="${machine.id}"
+        <button class="ge-btn ge-btn--dark ge-btn--sm ge-details-btn" data-machine-token="${machineToken}"
           style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
       `;
       return card;
@@ -413,9 +526,9 @@ async function loadSoldBuilds(config) {
       decks.forEach((_, i) => {
         const dot = document.createElement('button');
         dot.className = 'ge-sold-dot';
+        dot.setAttribute('data-sold-dot', String(i));
         dot.setAttribute('aria-label', `Go to build ${i + 1}`);
         dot.style.cssText = `width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer;background:${i === 0 ? 'var(--volt-400)' : 'var(--ink-600)'};transition:background .2s,transform .15s;`;
-        dot.addEventListener('click', () => goTo(i));
         dotsWrap.appendChild(dot);
         dots.push(dot);
       });
@@ -423,32 +536,55 @@ async function loadSoldBuilds(config) {
 
     function goTo(idx) {
       current = ((idx % decks.length) + decks.length) % decks.length;
+      carousel._soldCurrent = current;
       track.style.transform = `translateX(calc(${current} * (var(--ge-sold-card-w) + 24px) * -1))`;
       dots.forEach((d, i) => d.style.background = i === current ? 'var(--volt-400)' : 'var(--ink-600)');
     }
 
-    carousel.querySelector('.ge-sold-prev').addEventListener('click', () => goTo(current - 1));
-    carousel.querySelector('.ge-sold-next').addEventListener('click', () => goTo(current + 1));
+    carousel._soldDecks = decks;
+    carousel._soldGoTo = goTo;
+    carousel._soldCurrent = current;
+    carousel._soldTouchStartX = 0;
 
-    let touchStartX = 0;
-    track.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
-    }, { passive: true });
-
-    track.addEventListener('click', function(e) {
-      const btn = e.target.closest('.ge-sold-thumb-btn');
-      if (!btn) return;
-      const machId = btn.getAttribute('data-sold-machine');
-      const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
-      const deck = decks.find(d => d.machine.id === machId);
-      if (!deck) return;
-      const mainEl = document.getElementById(`${machId}-main`);
-      if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
-      track.querySelectorAll(`[data-sold-machine="${machId}"]`).forEach(b => b.style.borderColor = 'transparent');
-      btn.style.borderColor = '#00ffcc';
-    });
+    if (!carousel.dataset.boundInteractions) {
+      carousel.dataset.boundInteractions = 'true';
+      carousel.addEventListener('click', function(e) {
+        const prevBtn = e.target.closest('.ge-sold-prev');
+        if (prevBtn) {
+          this._soldGoTo?.((this._soldCurrent || 0) - 1);
+          return;
+        }
+        const nextBtn = e.target.closest('.ge-sold-next');
+        if (nextBtn) {
+          this._soldGoTo?.((this._soldCurrent || 0) + 1);
+          return;
+        }
+        const dotBtn = e.target.closest('[data-sold-dot]');
+        if (dotBtn) {
+          const dotIdx = parseInt(dotBtn.getAttribute('data-sold-dot'), 10);
+          if (!Number.isNaN(dotIdx)) this._soldGoTo?.(dotIdx);
+          return;
+        }
+        const btn = e.target.closest('.ge-sold-thumb-btn');
+        if (!btn) return;
+        const machineToken = btn.getAttribute('data-sold-machine-token');
+        const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
+        const machineId = machineToken ? _machineIdByToken[machineToken] : null;
+        const deck = this._soldDecks?.find(d => String(d.machine.id) === machineId);
+        if (!deck) return;
+        const mainEl = document.getElementById(getMachineMainImageId(machineId));
+        if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
+        this.querySelectorAll(`.ge-sold-thumb-btn[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
+        btn.style.borderColor = '#00ffcc';
+      });
+      carousel.addEventListener('touchstart', function(e) {
+        this._soldTouchStartX = e.changedTouches[0].clientX;
+      }, { passive: true });
+      carousel.addEventListener('touchend', function(e) {
+        const dx = e.changedTouches[0].clientX - (this._soldTouchStartX || 0);
+        if (Math.abs(dx) > 40) this._soldGoTo?.(dx < 0 ? (this._soldCurrent || 0) + 1 : (this._soldCurrent || 0) - 1);
+      }, { passive: true });
+    }
 
     carousel.style.display = '';
     goTo(0);
@@ -457,8 +593,169 @@ async function loadSoldBuilds(config) {
   }
 }
 
+async function renderInventoryFromConfig(config) {
+  Object.keys(_machineIdByToken).forEach(key => delete _machineIdByToken[key]);
+  Object.keys(_machineSpecs).forEach(key => delete _machineSpecs[key]);
+  await loadMachines(config);
+  await loadSoldBuilds(config);
+  queueHeaderToneUpdate();
+  return config;
+}
+
+async function bootstrapSiteFromConfig(forceRefresh = false) {
+  if (_initialBootstrapRequest) {
+    if (forceRefresh) _bootstrapNeedsForceRefresh = true;
+    return _initialBootstrapRequest;
+  }
+  _initialBootstrapRequest = (async () => {
+    let nextForceRefresh = forceRefresh;
+    let config = null;
+    do {
+      _bootstrapNeedsForceRefresh = false;
+      config = await loadConfig(nextForceRefresh);
+      await injectStaticImages(config);
+      await renderInventoryFromConfig(config);
+      await loadPortfolio(config);
+      _hasCompletedInitialConfigBootstrap = true;
+      _lastInventoryRefreshAt = Date.now();
+      if (_bootstrapNeedsForceRefresh && _bootstrapDeferredRefreshMinInterval > 0) {
+        const deferredInterval = _bootstrapDeferredRefreshMinInterval;
+        _bootstrapDeferredRefreshMinInterval = 0;
+        return await scheduleInventoryRefresh(deferredInterval);
+      }
+      nextForceRefresh = _bootstrapNeedsForceRefresh;
+    } while (nextForceRefresh);
+    return config;
+  })().finally(() => {
+    _initialBootstrapRequest = null;
+  });
+  return _initialBootstrapRequest;
+}
+
+function scheduleInventoryRefresh(delayMs) {
+  if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
+  if (!_scheduledInventoryRefresh) {
+    _scheduledInventoryRefresh = new Promise((resolve, reject) => {
+      _scheduledInventoryRefreshResolve = resolve;
+      _scheduledInventoryRefreshReject = reject;
+    });
+  }
+  _scheduledInventoryRefreshTimer = setTimeout(async () => {
+    const resolve = _scheduledInventoryRefreshResolve;
+    const reject = _scheduledInventoryRefreshReject;
+    _scheduledInventoryRefreshResolve = null;
+    _scheduledInventoryRefreshReject = null;
+    _scheduledInventoryRefreshTimer = null;
+    _scheduledInventoryRefreshDueAt = 0;
+    _scheduledInventoryRefresh = null;
+    refreshInventoryFromConfig().then(resolve, reject);
+  }, delayMs);
+  _scheduledInventoryRefreshDueAt = Date.now() + delayMs;
+  return _scheduledInventoryRefresh;
+}
+
+function flushScheduledInventoryRefresh() {
+  if (!_scheduledInventoryRefresh) {
+    return _inventoryRefreshRequest || Promise.resolve(_config);
+  }
+  if (_inventoryRefreshRequest) {
+    _inventoryRefreshPending = true;
+    if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
+    _scheduledInventoryRefreshTimer = null;
+    _scheduledInventoryRefreshDueAt = 0;
+    const scheduledPromise = _scheduledInventoryRefresh;
+    const resolve = _scheduledInventoryRefreshResolve;
+    const reject = _scheduledInventoryRefreshReject;
+    _scheduledInventoryRefreshResolve = null;
+    _scheduledInventoryRefreshReject = null;
+    _scheduledInventoryRefresh = null;
+    _inventoryRefreshRequest.then(resolve, reject);
+    return scheduledPromise;
+  }
+  if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
+  _scheduledInventoryRefreshTimer = null;
+  _scheduledInventoryRefreshDueAt = 0;
+  const resolve = _scheduledInventoryRefreshResolve;
+  const reject = _scheduledInventoryRefreshReject;
+  _scheduledInventoryRefreshResolve = null;
+  _scheduledInventoryRefreshReject = null;
+  _scheduledInventoryRefresh = null;
+  const immediateRefresh = refreshInventoryFromConfig();
+  if (resolve || reject) immediateRefresh.then(resolve, reject);
+  return immediateRefresh;
+}
+
+async function refreshInventoryFromConfig() {
+  if (_inventoryRefreshRequest) {
+    _inventoryRefreshPending = true;
+    return _inventoryRefreshRequest;
+  }
+  _inventoryRefreshRequest = (async () => {
+    let config = null;
+    let refreshError = null;
+    _inventoryRefreshPending = false;
+    _lastInventoryRefreshStartedAt = Date.now();
+    try {
+      config = await loadConfig(true);
+      await renderInventoryFromConfig(config);
+      _lastInventoryRefreshAt = Date.now();
+    } catch (error) {
+      console.error('Inventory refresh error:', error);
+      refreshError = error;
+    } finally {
+      const shouldRunAgain = _inventoryRefreshPending;
+      _inventoryRefreshRequest = null;
+      if (shouldRunAgain) {
+        _inventoryRefreshPending = false;
+        return refreshInventoryFromConfig();
+      }
+    }
+    if (refreshError) throw refreshError;
+    return config;
+  });
+  return _inventoryRefreshRequest;
+}
+
+function requestInventoryRefresh(minIntervalMs = 0) {
+  if (!_hasCompletedInitialConfigBootstrap) {
+    if (_initialBootstrapRequest) {
+      if (minIntervalMs > 0) {
+        _bootstrapNeedsForceRefresh = true;
+        _bootstrapDeferredRefreshMinInterval = Math.max(_bootstrapDeferredRefreshMinInterval, minIntervalMs);
+        return _initialBootstrapRequest;
+      }
+      return bootstrapSiteFromConfig(true);
+    }
+    return bootstrapSiteFromConfig(true);
+  }
+  if (_inventoryRefreshRequest) {
+    _inventoryRefreshPending = true;
+    return _inventoryRefreshRequest;
+  }
+  if (!_config) return refreshInventoryFromConfig();
+  const lastRefreshMarker = Math.max(_lastInventoryRefreshStartedAt || 0, _lastInventoryRefreshAt || 0);
+  if (lastRefreshMarker) {
+    const elapsed = Date.now() - lastRefreshMarker;
+    if (_scheduledInventoryRefresh) {
+      if (minIntervalMs === 0) return flushScheduledInventoryRefresh();
+      const remainingDelay = Math.max(0, _scheduledInventoryRefreshDueAt - Date.now());
+      const desiredDelay = Math.max(0, minIntervalMs - elapsed);
+      if (desiredDelay < remainingDelay) {
+        return scheduleInventoryRefresh(desiredDelay);
+      }
+      return _scheduledInventoryRefresh;
+    }
+    if (elapsed < minIntervalMs) {
+      return scheduleInventoryRefresh(minIntervalMs - elapsed);
+    }
+  }
+  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
+  return refreshInventoryFromConfig();
+}
+
 // ===== PC DETAIL MODAL =====
 const _machineSpecs = {};
+const _machineIdByToken = {};
 
 function openMachineModal(machineId) {
   const data = _machineSpecs[machineId];
@@ -468,9 +765,10 @@ function openMachineModal(machineId) {
   const modalImg = document.getElementById('ge-modal-img');
   setImageHints(modalImg, { loading: 'eager', fetchPriority: 'high' });
   const imgWrap = document.getElementById('ge-modal-img-wrap');
-  const mainEl = document.getElementById(`${machineId}-main`);
-  const activeUrl = mainEl ? mainEl.src : (data.images && data.images.length ? data.images[0].secure_url : '');
-  if (modalImg && activeUrl) {
+  const mainEl = document.getElementById(getMachineMainImageId(machineId));
+  const hasImages = Array.isArray(data.images) && data.images.length > 0;
+  const activeUrl = mainEl?.src || (hasImages ? data.images[0].secure_url : '');
+  if (modalImg && hasImages && activeUrl) {
     swapImageSource(modalImg, activeUrl);
     modalImg.alt = data.title;
     imgWrap.style.display = 'block';
@@ -479,7 +777,7 @@ function openMachineModal(machineId) {
   }
 
   const thumbsWrap = document.getElementById('ge-modal-thumbs');
-  if (thumbsWrap && data.images && data.images.length > 1) {
+  if (thumbsWrap && hasImages && data.images.length > 1) {
     thumbsWrap.innerHTML = data.images.map((img, idx) => {
       const isActive = img.secure_url === activeUrl;
       return `<button class="ge-modal-thumb-btn" data-src="${img.secure_url}"
@@ -667,6 +965,10 @@ document.addEventListener('DOMContentLoaded', async function() {
   window.addEventListener('scroll', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('resize', queueHeaderToneUpdate, { passive: true });
   window.addEventListener('hashchange', handleHashAnchors);
+  window.addEventListener('focus', () => { requestInventoryRefresh(INVENTORY_REFRESH_DEBOUNCE_MS); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) requestInventoryRefresh(INVENTORY_REFRESH_DEBOUNCE_MS);
+  });
   initSmoothSectionLinks();
   handleHashAnchors();
   queueHeaderToneUpdate();
@@ -682,17 +984,25 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Details buttons (delegated — injected after config loads)
   document.addEventListener('click', function(e) {
+    const mediaTrigger = e.target.closest('[data-open-machine-token]');
+    if (mediaTrigger) {
+      const token = mediaTrigger.getAttribute('data-open-machine-token');
+      if (token && _machineIdByToken[token]) openMachineModal(_machineIdByToken[token]);
+      return;
+    }
     const btn = e.target.closest('.ge-details-btn');
-    if (btn) openMachineModal(btn.getAttribute('data-machine-id'));
+    if (!btn) return;
+    const token = btn.getAttribute('data-machine-token');
+    if (token && _machineIdByToken[token]) {
+      openMachineModal(_machineIdByToken[token]);
+      return;
+    }
+    openMachineModal(btn.getAttribute('data-machine-id'));
   });
 
   // Load images from config
   try {
-    const config = await loadConfig();
-    await injectStaticImages(config);
-    await loadMachines(config);
-    await loadSoldBuilds(config);
-    await loadPortfolio(config);
+    await bootstrapSiteFromConfig();
   } catch (e) {
     console.error('Failed to load cloudinary-config.json:', e);
   }
