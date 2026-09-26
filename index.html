@@ -783,6 +783,17 @@ function scheduleInventoryRefresh(delayMs) {
   return _scheduledInventoryRefresh;
 }
 
+function flushScheduledInventoryRefresh() {
+  if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
+  _scheduledInventoryRefreshTimer = null;
+  const resolve = _scheduledInventoryRefreshResolve;
+  _scheduledInventoryRefreshResolve = null;
+  _scheduledInventoryRefresh = null;
+  const immediateRefresh = refreshInventoryFromConfig();
+  if (resolve) immediateRefresh.then(resolve);
+  return immediateRefresh;
+}
+
 async function refreshInventoryFromConfig() {
   if (_inventoryRefreshRequest) {
     _inventoryRefreshPending = true;
@@ -813,8 +824,13 @@ function requestInventoryRefresh(minIntervalMs = 0) {
     _inventoryRefreshPending = true;
     return _inventoryRefreshRequest;
   }
-  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   if (!_config) return refreshInventoryFromConfig();
+  if (_scheduledInventoryRefresh) {
+    if (!_lastInventoryRefreshAt || Date.now() - _lastInventoryRefreshAt >= minIntervalMs) {
+      return flushScheduledInventoryRefresh();
+    }
+    return _scheduledInventoryRefresh;
+  }
   if (_lastInventoryRefreshAt) {
     const elapsed = Date.now() - _lastInventoryRefreshAt;
     if (elapsed < minIntervalMs) {
