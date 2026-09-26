@@ -237,6 +237,8 @@ let _config = null;
 let _configRequest = null;
 let _inventoryRefreshRequest = null;
 let _inventoryRefreshPending = false;
+let _scheduledInventoryRefresh = null;
+let _scheduledInventoryRefreshTimer = null;
 let _lastInventoryRefreshAt = 0;
 let _lastInventoryRefreshStartedAt = 0;
 let _activeSmoothScroll = 0;
@@ -729,6 +731,18 @@ async function renderInventoryFromConfig(config) {
   return config;
 }
 
+function scheduleInventoryRefresh(delayMs) {
+  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
+  _scheduledInventoryRefresh = new Promise(resolve => {
+    _scheduledInventoryRefreshTimer = setTimeout(async () => {
+      _scheduledInventoryRefreshTimer = null;
+      _scheduledInventoryRefresh = null;
+      resolve(await refreshInventoryFromConfig());
+    }, delayMs);
+  });
+  return _scheduledInventoryRefresh;
+}
+
 async function refreshInventoryFromConfig() {
   if (_inventoryRefreshRequest) {
     _inventoryRefreshPending = true;
@@ -754,10 +768,14 @@ async function refreshInventoryFromConfig() {
 }
 
 function requestInventoryRefresh(minIntervalMs = 0) {
+  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
   if (_inventoryRefreshRequest) return _inventoryRefreshRequest;
   if (!_config) return refreshInventoryFromConfig();
-  if (_lastInventoryRefreshAt && Date.now() - _lastInventoryRefreshAt < minIntervalMs) {
-    return renderInventoryFromConfig(_config);
+  if (_lastInventoryRefreshAt) {
+    const elapsed = Date.now() - _lastInventoryRefreshAt;
+    if (elapsed < minIntervalMs) {
+      return scheduleInventoryRefresh(minIntervalMs - elapsed);
+    }
   }
   return refreshInventoryFromConfig();
 }
