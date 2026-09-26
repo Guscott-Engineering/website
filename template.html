@@ -79,6 +79,7 @@ let _scheduledInventoryRefresh = null;
 let _scheduledInventoryRefreshTimer = null;
 let _initialBootstrapRequest = null;
 let _hasCompletedInitialConfigBootstrap = false;
+let _bootstrapNeedsForceRefresh = false;
 let _lastInventoryRefreshAt = 0;
 let _lastInventoryRefreshStartedAt = 0;
 let _activeSmoothScroll = 0;
@@ -572,13 +573,22 @@ async function renderInventoryFromConfig(config) {
 }
 
 async function bootstrapSiteFromConfig(forceRefresh = false) {
-  if (_initialBootstrapRequest) return _initialBootstrapRequest;
+  if (_initialBootstrapRequest) {
+    if (forceRefresh) _bootstrapNeedsForceRefresh = true;
+    return _initialBootstrapRequest;
+  }
   _initialBootstrapRequest = (async () => {
-    const config = await loadConfig(forceRefresh);
-    await injectStaticImages(config);
-    await renderInventoryFromConfig(config);
-    await loadPortfolio(config);
-    _hasCompletedInitialConfigBootstrap = true;
+    let nextForceRefresh = forceRefresh;
+    let config = null;
+    do {
+      _bootstrapNeedsForceRefresh = false;
+      config = await loadConfig(nextForceRefresh);
+      await injectStaticImages(config);
+      await renderInventoryFromConfig(config);
+      await loadPortfolio(config);
+      _hasCompletedInitialConfigBootstrap = true;
+      nextForceRefresh = _bootstrapNeedsForceRefresh;
+    } while (nextForceRefresh);
     return config;
   })().finally(() => {
     _initialBootstrapRequest = null;
