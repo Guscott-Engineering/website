@@ -238,13 +238,13 @@ async function loadMachines(config) {
 
     for (const { machine, images } of machineDecks) {
       const machineId = String(machine.id);
-      const machineIdAttr = escapeHtml(machineId);
       const machineToken = encodeURIComponent(machineId);
       const title = escapeHtml(machine.title || machine.id);
       const price = escapeHtml(machine.price || 'Contact for price');
       const mainImg = images[0];
 
       // Store specs and full images array for the modal
+      _machineIdByToken[machineToken] = machineId;
       _machineSpecs[machine.id] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
@@ -255,7 +255,7 @@ async function loadMachines(config) {
       `).join('');
       const mediaHtml = images.length > 0
         ? `
-            <div class="ge-cut ge-machine-img-wrap" data-open-machine-id="${machineIdAttr}" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;">
+            <div class="ge-cut ge-machine-img-wrap" data-open-machine-token="${machineToken}" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;">
               <img class="ge-cloudinary-image ge-machine-main" id="${machineToken}-main" src="${mainImg.secure_url}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
             </div>
           `
@@ -282,7 +282,7 @@ async function loadMachines(config) {
               ${thumbsHtml}
             </div>
           ` : ''}
-          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-id="${machineIdAttr}"
+          <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-token="${machineToken}"
             style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
         </div>
       `);
@@ -485,6 +485,7 @@ async function loadSoldBuilds(config) {
 
 // ===== PC DETAIL MODAL =====
 const _machineSpecs = {};
+const _machineIdByToken = {};
 
 function openMachineModal(machineId) {
   const data = _machineSpecs[machineId];
@@ -708,13 +709,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Details buttons (delegated — injected after config loads)
   document.addEventListener('click', function(e) {
-    const mediaTrigger = e.target.closest('[data-open-machine-id]');
+    const mediaTrigger = e.target.closest('[data-open-machine-token]');
     if (mediaTrigger) {
-      openMachineModal(mediaTrigger.getAttribute('data-open-machine-id'));
+      const token = mediaTrigger.getAttribute('data-open-machine-token');
+      if (token && _machineIdByToken[token]) openMachineModal(_machineIdByToken[token]);
       return;
     }
     const btn = e.target.closest('.ge-details-btn');
-    if (btn) openMachineModal(btn.getAttribute('data-machine-id'));
+    if (!btn) return;
+    const token = btn.getAttribute('data-machine-token');
+    if (token && _machineIdByToken[token]) {
+      openMachineModal(_machineIdByToken[token]);
+      return;
+    }
+    openMachineModal(btn.getAttribute('data-machine-id'));
   });
 
   // Load images from config
