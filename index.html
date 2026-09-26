@@ -239,6 +239,7 @@ let _inventoryRefreshRequest = null;
 let _inventoryRefreshPending = false;
 let _scheduledInventoryRefresh = null;
 let _scheduledInventoryRefreshTimer = null;
+let _scheduledInventoryRefreshResolve = null;
 let _initialBootstrapRequest = null;
 let _hasCompletedInitialConfigBootstrap = false;
 let _bootstrapNeedsForceRefresh = false;
@@ -482,21 +483,28 @@ async function loadMachines(config) {
         </div>
       `);
       renderedCount++;
-
-      document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(btn => {
-        btn.addEventListener('click', function() {
-          const idx = parseInt(this.getAttribute('data-idx'));
-          const mainEl = document.getElementById(machineMainImageId);
-          if (mainEl && images[idx]) swapImageSource(mainEl, images[idx].secure_url);
-          document.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(b => {
-            b.style.borderColor = 'transparent';
-          });
-          this.style.borderColor = '#00ffcc';
-        });
-      });
     }
     if (availSection) {
       availSection.style.display = renderedCount > 0 ? '' : 'none';
+    }
+    if (!container.dataset.boundThumbInteractions) {
+      container.dataset.boundThumbInteractions = 'true';
+      container.addEventListener('click', function(e) {
+        const btn = e.target.closest('.ge-thumb-btn');
+        if (!btn) return;
+        const machineToken = btn.getAttribute('data-machine-token');
+        const imgIdx = parseInt(btn.getAttribute('data-idx'), 10);
+        const machineId = machineToken ? _machineIdByToken[machineToken] : null;
+        const machineData = machineId ? _machineSpecs[machineId] : null;
+        const mainEl = machineId ? document.getElementById(getMachineMainImageId(machineId)) : null;
+        if (mainEl && machineData?.images?.[imgIdx]) {
+          swapImageSource(mainEl, machineData.images[imgIdx].secure_url);
+        }
+        this.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(thumb => {
+          thumb.style.borderColor = 'transparent';
+        });
+        btn.style.borderColor = '#00ffcc';
+      });
     }
   } catch (e) {
     console.error('Machines load error:', e);
@@ -759,14 +767,19 @@ async function bootstrapSiteFromConfig(forceRefresh = false) {
 }
 
 function scheduleInventoryRefresh(delayMs) {
-  if (_scheduledInventoryRefresh) return _scheduledInventoryRefresh;
-  _scheduledInventoryRefresh = new Promise(resolve => {
-    _scheduledInventoryRefreshTimer = setTimeout(async () => {
-      _scheduledInventoryRefreshTimer = null;
-      _scheduledInventoryRefresh = null;
-      resolve(await refreshInventoryFromConfig());
-    }, delayMs);
-  });
+  if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
+  if (!_scheduledInventoryRefresh) {
+    _scheduledInventoryRefresh = new Promise(resolve => {
+      _scheduledInventoryRefreshResolve = resolve;
+    });
+  }
+  _scheduledInventoryRefreshTimer = setTimeout(async () => {
+    const resolve = _scheduledInventoryRefreshResolve;
+    _scheduledInventoryRefreshResolve = null;
+    _scheduledInventoryRefreshTimer = null;
+    _scheduledInventoryRefresh = null;
+    resolve(await refreshInventoryFromConfig());
+  }, delayMs);
   return _scheduledInventoryRefresh;
 }
 
