@@ -820,6 +820,20 @@ function flushScheduledInventoryRefresh() {
   if (!_scheduledInventoryRefresh) {
     return _inventoryRefreshRequest || Promise.resolve(_config);
   }
+  if (_inventoryRefreshRequest) {
+    _inventoryRefreshPending = true;
+    if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
+    _scheduledInventoryRefreshTimer = null;
+    _scheduledInventoryRefreshDueAt = 0;
+    const scheduledPromise = _scheduledInventoryRefresh;
+    const resolve = _scheduledInventoryRefreshResolve;
+    const reject = _scheduledInventoryRefreshReject;
+    _scheduledInventoryRefreshResolve = null;
+    _scheduledInventoryRefreshReject = null;
+    _scheduledInventoryRefresh = null;
+    _inventoryRefreshRequest.then(resolve, reject);
+    return scheduledPromise;
+  }
   if (_scheduledInventoryRefreshTimer) clearTimeout(_scheduledInventoryRefreshTimer);
   _scheduledInventoryRefreshTimer = null;
   _scheduledInventoryRefreshDueAt = 0;
