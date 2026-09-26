@@ -95,6 +95,16 @@ function getCloudinaryUrl(cloudName, publicId, width, height, crop) {
   return url;
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
 async function fetchCloudinaryImages(cloudName, tag) {
   try {
     const response = await fetch(
@@ -208,12 +218,17 @@ async function injectStaticImages(config) {
 
 async function loadMachines(config) {
   try {
+    const availSection = document.getElementById('available');
     const container = document.getElementById('machines-container');
     if (!container) return;
+    container.innerHTML = '';
     const machines = Object.entries(config.images.machines)
       .map(([id, m]) => ({ id, ...m }))
       .filter(machine => !machine.sold);
-    let hasAny = false;
+    if (availSection) {
+      availSection.style.display = machines.length > 0 ? '' : 'none';
+    }
+    if (machines.length === 0) return;
     const machineDecks = await Promise.all(
       machines.map(async machine => ({
         machine,
@@ -222,8 +237,8 @@ async function loadMachines(config) {
     );
 
     for (const { machine, images } of machineDecks) {
-      if (images.length === 0) continue;
-      hasAny = true;
+      const title = escapeHtml(machine.title || machine.id);
+      const price = escapeHtml(machine.price || 'Contact for price');
       const mainImg = images[0];
 
       // Store specs and full images array for the modal
@@ -232,25 +247,38 @@ async function loadMachines(config) {
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine="${machine.id}" data-idx="${idx}"
           style="flex:none;width:54px;height:54px;padding:0;border:2px solid ${idx === 0 ? '#00ffcc' : 'transparent'};border-radius:4px;overflow:hidden;background:var(--ink-1000);cursor:pointer;">
-          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${machine.title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
+          <img class="ge-cloudinary-image" src="${img.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="${title} thumbnail ${idx + 1}" decoding="async" loading="lazy">
         </button>
       `).join('');
+      const mediaHtml = images.length > 0
+        ? `
+            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
+              <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
+            </div>
+          `
+        : `
+            <div class="ge-cut ge-machine-img-wrap" style="background:linear-gradient(135deg,var(--ink-950),var(--ink-850));aspect-ratio:16/9;padding:18px;">
+              <div class="ge-slot" style="height:100%;background:rgba(255,255,255,.02);border-radius:8px;">
+                <span class="ge-slot__cap">Photos for ${title} coming soon</span>
+              </div>
+            </div>
+          `;
 
       container.insertAdjacentHTML('beforeend', `
         <div class="ge-card ge-card--pad">
           <div style="position:relative;">
-            <div class="ge-cut ge-machine-img-wrap" style="background:var(--ink-1000);aspect-ratio:16/9;cursor:pointer;" onclick="openMachineModal('${machine.id}')">
-              <img class="ge-cloudinary-image ge-machine-main" id="${machine.id}-main" src="${mainImg.secure_url}" alt="${machine.title}" style="width:100%;height:100%;object-fit:cover;display:block;" decoding="async" loading="lazy">
-            </div>
+            ${mediaHtml}
             <div style="position:absolute;top:12px;left:12px;">
               <span class="ge-badge ge-badge--volt"><span class="ge-badge__dot"></span>In stock</span>
             </div>
           </div>
-          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${machine.title}</h3>
-          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${machine.price}</p>
-          <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
-            ${thumbsHtml}
-          </div>
+          <h3 style="margin:16px 0 8px;font-size:18px;font-weight:600;color:var(--ink-900);">${title}</h3>
+          <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:var(--volt-600);">${price}</p>
+          ${thumbsHtml ? `
+            <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;">
+              ${thumbsHtml}
+            </div>
+          ` : ''}
           <button class="ge-btn ge-btn--secondary ge-btn--sm ge-details-btn" data-machine-id="${machine.id}"
             style="margin-top:14px;width:100%;">View Specs &amp; Details</button>
         </div>
@@ -267,11 +295,6 @@ async function loadMachines(config) {
           this.style.borderColor = '#00ffcc';
         });
       });
-    }
-
-    if (!hasAny) {
-      const availSection = document.getElementById('available');
-      if (availSection) availSection.style.display = 'none';
     }
   } catch (e) {
     console.error('Machines load error:', e);
