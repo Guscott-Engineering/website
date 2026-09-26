@@ -511,7 +511,7 @@ async function loadMachines(config) {
         if (mainEl && machineData?.images?.[imgIdx]) {
           swapImageSource(mainEl, machineData.images[imgIdx].secure_url);
         }
-        this.querySelectorAll(`[data-machine-token="${machineToken}"]`).forEach(thumb => {
+        this.querySelectorAll(`.ge-thumb-btn[data-machine-token="${machineToken}"]`).forEach(thumb => {
           thumb.style.borderColor = 'transparent';
         });
         btn.style.borderColor = '#00ffcc';
@@ -725,7 +725,7 @@ async function loadSoldBuilds(config) {
         if (!deck) return;
         const mainEl = document.getElementById(getMachineMainImageId(machineId));
         if (mainEl && deck.images[imgIdx]) swapImageSource(mainEl, deck.images[imgIdx].secure_url);
-        this.querySelectorAll(`[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
+        this.querySelectorAll(`.ge-sold-thumb-btn[data-sold-machine-token="${machineToken}"]`).forEach(b => b.style.borderColor = 'transparent');
         btn.style.borderColor = '#00ffcc';
       });
       carousel.addEventListener('touchstart', function(e) {
