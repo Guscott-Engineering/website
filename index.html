@@ -817,20 +817,27 @@ async function refreshInventoryFromConfig() {
     return _inventoryRefreshRequest;
   }
   _inventoryRefreshRequest = (async () => {
-    do {
-      _inventoryRefreshPending = false;
-      _lastInventoryRefreshStartedAt = Date.now();
-      try {
-        const config = await loadConfig(true);
-        await renderInventoryFromConfig(config);
-        _lastInventoryRefreshAt = Date.now();
-      } catch (error) {
-        console.error('Inventory refresh error:', error);
-        throw error;
+    let config = null;
+    let refreshError = null;
+    _inventoryRefreshPending = false;
+    _lastInventoryRefreshStartedAt = Date.now();
+    try {
+      config = await loadConfig(true);
+      await renderInventoryFromConfig(config);
+      _lastInventoryRefreshAt = Date.now();
+    } catch (error) {
+      console.error('Inventory refresh error:', error);
+      refreshError = error;
+    } finally {
+      const shouldRunAgain = _inventoryRefreshPending;
+      _inventoryRefreshRequest = null;
+      if (shouldRunAgain) {
+        _inventoryRefreshPending = false;
+        return refreshInventoryFromConfig();
       }
-    } while (_inventoryRefreshPending);
-  })().finally(() => {
-    _inventoryRefreshRequest = null;
+    }
+    if (refreshError) throw refreshError;
+    return config;
   });
   return _inventoryRefreshRequest;
 }
