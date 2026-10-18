@@ -74,14 +74,6 @@ img{max-width:100%;}
 .ge-machine-img-wrap{overflow:hidden;transform:translateZ(0);}
 .ge-machine-img-wrap img{transition:transform .4s var(--ease-pop,cubic-bezier(.34,1.3,.64,1));}
 .ge-machine-img-wrap:hover img{transform:scale(1.06);}
-.ge-machine-main{
-  transition:opacity .28s ease,transform .28s cubic-bezier(.4,0,.2,1);
-  will-change:opacity,transform;
-}
-.ge-machine-main.ge-media-swapping{
-  opacity:.72;
-  transform:translateY(6px);
-}
 .ge-thumb-btn,.ge-modal-thumb-btn{
   transition:transform .2s var(--ease-mechanical),box-shadow .2s var(--ease-mechanical);
   will-change:transform;

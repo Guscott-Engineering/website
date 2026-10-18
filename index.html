@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="styles/components.css">
 <link rel="stylesheet" href="styles/site.css">
 
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
 
 <body>
@@ -254,7 +254,6 @@ let _activeSmoothScroll = 0;
 let _headerToneQueued = false;
 let _skipNextHashChange = false;
 const _loadedImageUrls = new Set();
-const _imagePreloadPromises = new Map();
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const INVENTORY_REFRESH_DEBOUNCE_MS = 1500;
 
@@ -363,51 +362,8 @@ function normalizeUrl(src) {
 
 function swapImageSource(imgEl, nextSrc) {
   if (!imgEl || !nextSrc) return;
-  const normalizedNextSrc = normalizeUrl(nextSrc);
-  const currentSrc = imgEl.getAttribute('src') || '';
-  if (normalizeUrl(currentSrc) === normalizedNextSrc) return;
-  imgEl.dataset.pendingSrc = nextSrc;
-  imgEl.classList.add('ge-media-swapping');
-
-  if (_loadedImageUrls.has(normalizedNextSrc)) {
-    imgEl.src = nextSrc;
-    _loadedImageUrls.add(normalizedNextSrc);
-    requestAnimationFrame(() => {
-      if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
-    });
-    return;
-  }
-
-  let preloadPromise = _imagePreloadPromises.get(normalizedNextSrc);
-  if (!preloadPromise) {
-    preloadPromise = new Promise((resolve, reject) => {
-      const preloader = new Image();
-      preloader.decoding = 'async';
-      preloader.onload = () => {
-        _loadedImageUrls.add(normalizedNextSrc);
-        _imagePreloadPromises.delete(normalizedNextSrc);
-        resolve();
-      };
-      preloader.onerror = () => {
-        _imagePreloadPromises.delete(normalizedNextSrc);
-        reject(new Error(`Failed to preload ${nextSrc}`));
-      };
-      preloader.src = nextSrc;
-    });
-    _imagePreloadPromises.set(normalizedNextSrc, preloadPromise);
-  }
-
-  preloadPromise.then(() => {
-    if (imgEl.dataset.pendingSrc !== nextSrc) return;
-    imgEl.src = nextSrc;
-    requestAnimationFrame(() => {
-      if (imgEl.dataset.pendingSrc === nextSrc) imgEl.classList.remove('ge-media-swapping');
-    });
-  }).catch(() => {
-    if (imgEl.dataset.pendingSrc !== nextSrc) return;
-    imgEl.src = nextSrc;
-    imgEl.classList.remove('ge-media-swapping');
-  });
+  if (normalizeUrl(imgEl.getAttribute('src') || '') === normalizeUrl(nextSrc)) return;
+  imgEl.src = nextSrc;
 }
 
 async function injectStaticImages(config) {
@@ -588,12 +544,21 @@ async function loadPortfolio(config) {
     dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
 
     // Touch / swipe support
-    let touchStartX = 0;
-    carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
-    carousel.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
-    });
+    // Bound once; the carousel element persists across inventory refreshes
+    carousel._portGoTo = goTo;
+    carousel._portCurrent = () => current;
+    if (!carousel.dataset.boundSwipe) {
+      carousel.dataset.boundSwipe = 'true';
+      let touchStartX = 0;
+      carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
+      carousel.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 40 && carousel._portGoTo) {
+          const cur = carousel._portCurrent();
+          carousel._portGoTo(dx < 0 ? cur + 1 : cur - 1);
+        }
+      });
+    }
 
   } catch (e) {
     console.error('Portfolio load error:', e);
