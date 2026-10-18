@@ -20,6 +20,7 @@
         "tag": "PC1",
         "title": "Custom PC Workstation 01",
         "price": "$900",
+        "description": "A Ryzen 5 workstation with an RX 6700, 32 GB of RGB memory, and fast SSD plus hard-drive storage.",
         "specs": {
           "CPU": "AMD Ryzen 5 5600X (6C / 12T)",
           "GPU": "XFX RX 6700 10GB Speedster SWFT 309",
@@ -36,6 +37,7 @@
         "tag": "PC2",
         "title": "Custom PC Workstation 02",
         "price": "$750",
+        "description": "A Ryzen 5 gaming workstation with RTX 3060 Ti graphics, a 1 TB SSD, and a fresh Windows 11 install.",
         "specs": {
           "CPU": "AMD Ryzen 5 3600X (6C / 12T)",
           "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB OC",
@@ -50,6 +52,7 @@
         "tag": "PC3",
         "title": "Custom PC Workstation 03",
         "price": "$825",
+        "description": "A Ryzen 7 gaming workstation with RTX 3060 Ti graphics, 32 GB of memory, and hybrid SSD and HDD storage.",
         "specs": {
           "CPU": "AMD Ryzen 7 2700X (8C / 16T)",
           "GPU": "NVIDIA GeForce RTX 3060 Ti 8GB FE",
@@ -64,6 +67,7 @@
         "tag": "PC4",
         "title": "Custom PC Workstation 04",
         "price": "$1200",
+        "description": "A Ryzen 7 gaming workstation with RX 6700 XT graphics, 32 GB of memory, and a 360 mm liquid cooler.",
         "sold": true,
         "specs": {
           "CPU": "AMD Ryzen 7 5800X",
@@ -80,6 +84,7 @@
         "tag": "PC5",
         "title": "Custom PC Workstation 05",
         "price": "$1500",
+        "description": "An Intel Core i7 gaming workstation with RTX 3070 graphics, 32 GB of DDR5 memory, and 2 TB of NVMe storage.",
         "specs": {
           "CPU": "Intel Core i7-12700KF",
           "GPU": "NVIDIA RTX 3070",
