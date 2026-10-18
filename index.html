@@ -588,12 +588,21 @@ async function loadPortfolio(config) {
     dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
 
     // Touch / swipe support
-    let touchStartX = 0;
-    carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
-    carousel.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
-    });
+    // Bound once; the carousel element persists across inventory refreshes
+    carousel._portGoTo = goTo;
+    carousel._portCurrent = () => current;
+    if (!carousel.dataset.boundSwipe) {
+      carousel.dataset.boundSwipe = 'true';
+      let touchStartX = 0;
+      carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
+      carousel.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 40 && carousel._portGoTo) {
+          const cur = carousel._portCurrent();
+          carousel._portGoTo(dx < 0 ? cur + 1 : cur - 1);
+        }
+      });
+    }
 
   } catch (e) {
     console.error('Portfolio load error:', e);
