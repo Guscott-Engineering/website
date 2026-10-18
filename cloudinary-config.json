@@ -91,6 +91,49 @@
           "OS": "Windows 11 Pro"
         },
         "sold": true
+      },
+      "m6": {
+        "tag": "PC6",
+        "title": "White Mid-Range Gaming PC",
+        "price": "Contact for price",
+        "draft": true,
+        "description": "A sleek all-white gaming PC, fully assembled and stress-tested for high-FPS 1080p and 1440p gaming, streaming, content creation, and everyday productivity.",
+        "specs": {
+          "CPU": "AMD Ryzen 5 5500 (6 Cores / 12 Threads, up to 4.2 GHz Boost)",
+          "GPU": "NVIDIA GeForce RTX 4060",
+          "RAM": "16 GB DDR4 3600 MHz",
+          "Storage": "500 GB NVMe M.2 SSD",
+          "Motherboard": "MSI MAG B550 TOMAHAWK MAX WIFI"
+        }
+      },
+      "m7": {
+        "tag": "PC7",
+        "title": "Low-Profile Mid-Range Gaming PC",
+        "price": "Contact for price",
+        "draft": true,
+        "description": "A low-profile, fully tested and cleaned gaming PC built for high-FPS 1080p and 1440p gaming, streaming, content creation, and multitasking.",
+        "specs": {
+          "CPU": "AMD Ryzen 7 5800XT (8 Cores / 16 Threads, up to 4.8 GHz Boost)",
+          "GPU": "NVIDIA GeForce RTX 4060",
+          "RAM": "32 GB Kingston Fury DDR4 3600 MHz",
+          "Storage": "500 GB NVMe SSD + 1 TB HDD",
+          "Motherboard": "MSI MAG B550 TOMAHAWK MAX WIFI",
+          "OS": "Windows 11 Pro (Fully Activated & Updated)"
+        }
+      },
+      "m8": {
+        "tag": "PC8",
+        "title": "Starter Gaming & School PC",
+        "price": "Contact for price",
+        "draft": true,
+        "description": "A cleaned, tested, ready-to-use desktop for school, office work, everyday tasks, and entry-level esports gaming.",
+        "specs": {
+          "CPU": "Intel Core i5-6500 (3.20 GHz)",
+          "GPU": "NVIDIA GeForce GTX 1050 Ti",
+          "RAM": "16 GB DDR4",
+          "Storage": "800 GB SSD total capacity",
+          "OS": "Windows 11 Pro (Activated)"
+        }
       }
     },
     "portfolio": {
