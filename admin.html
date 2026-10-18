@@ -61,8 +61,9 @@
   .btn-sm.danger:hover{border-color:var(--red);background:var(--red-bg)}
 
   /* ── Columns ── */
-  .columns{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-  @media(max-width:860px){.columns{grid-template-columns:1fr}}
+  .columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+  @media(max-width:1020px){.columns{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:640px){.columns{grid-template-columns:1fr}}
   .column{min-width:0}
   .col-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
   .col-header h2{font-family:var(--mono);font-size:1rem;letter-spacing:-.3px}
@@ -70,6 +71,7 @@
     padding:3px 10px;border-radius:20px}
   .col-available .col-header h2{color:var(--volt)}
   .col-portfolio .col-header h2{color:var(--text2)}
+  .col-drafts .col-header h2{color:#7dd3fc}
   .column-hint{color:var(--text3);font-size:.74rem;font-family:var(--mono);margin:-8px 0 14px}
   .machine-list{min-height:120px;border:1px dashed transparent;border-radius:var(--radius);transition:border-color .2s,background .2s}
   .machine-list.drop-target{border-color:var(--volt);background:rgba(204,255,0,.05)}
@@ -99,9 +101,12 @@
   .card-btn.sell:hover:not(:disabled){background:var(--volt-dim)}
   .card-btn.unsell{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
   .card-btn.unsell:hover:not(:disabled){border-color:var(--text3);color:var(--text)}
+  .card-btn.publish{background:var(--volt);color:var(--bg)}
+  .card-btn.publish:hover:not(:disabled){background:var(--volt-dim)}
   .card-btn.delete{background:transparent;color:var(--red);border:1px solid rgba(255,77,77,.25)}
   .card-btn.delete:hover:not(:disabled){border-color:var(--red);background:var(--red-bg)}
   .card.sold-card{opacity:.75}
+  .card.draft-card{border-style:dashed}
 
   /* ── Add Form ── */
   .add-section{margin-top:36px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
@@ -220,6 +225,14 @@
       <div class="column-hint">Drag cards here to archive them as sold builds.</div>
       <div id="portfolio-list" class="machine-list"></div>
     </div>
+    <div class="column col-drafts">
+      <div class="col-header">
+        <h2>Drafts (Unpublished)</h2>
+        <span class="badge" id="draft-count">0</span>
+      </div>
+      <div class="column-hint">Drafts stay hidden from the public site until published.</div>
+      <div id="draft-list" class="machine-list"></div>
+    </div>
   </div>
 
   <!-- Add Machine -->
@@ -232,6 +245,7 @@
         <div class="form-group"><label>Title *</label><input id="f-title" placeholder="Custom PC Workstation 06"></div>
         <div class="form-group"><label>Cloudinary Tag *</label><input id="f-tag" placeholder="PC6"></div>
         <div class="form-group"><label>Price *</label><input id="f-price" placeholder="$1200"></div>
+        <div class="form-group full"><label>Short description</label><textarea id="f-description" rows="3" placeholder="A concise overview of this build and what it is suited for."></textarea></div>
         <div class="form-group"><label>CPU</label><input id="f-cpu" placeholder="AMD Ryzen 7 5800X"></div>
         <div class="form-group"><label>GPU</label><input id="f-gpu" placeholder="NVIDIA RTX 3070"></div>
         <div class="form-group"><label>RAM</label><input id="f-ram" placeholder="32 GB DDR4 3600 MHz"></div>
@@ -392,7 +406,7 @@ function getMachines() {
   return config.images.machines;
 }
 
-function renderCard(key, m, isSold) {
+function renderCard(key, m, isSold, isDraft = false) {
   const specs = m.specs || {};
   const specKeys = ['CPU','GPU','RAM','Storage','Motherboard','Cooling','Case','PSU','OS'];
   let specHTML = '';
@@ -402,7 +416,7 @@ function renderCard(key, m, isSold) {
     }
   }
   return `
-    <div class="card ${isSold ? 'sold-card' : ''}" draggable="true"
+    <div class="card ${isSold ? 'sold-card' : ''} ${isDraft ? 'draft-card' : ''}" draggable="${isDraft ? 'false' : 'true'}"
       ondragstart="handleCardDragStart(event,'${key}',${isSold})"
       ondragend="handleCardDragEnd()">
       <div class="card-top">
@@ -412,7 +426,9 @@ function renderCard(key, m, isSold) {
       <div class="card-price">${esc(m.price || '—')}</div>
       ${specHTML ? `<div class="card-specs">${specHTML}</div>` : ''}
       <div class="card-actions">
-        ${isSold
+        ${isDraft
+          ? `<button class="card-btn publish" onclick="publishMachine('${key}')" ${busy?'disabled':''}>Publish → Available</button>`
+          : isSold
           ? `<button class="card-btn unsell" onclick="moveMachine('${key}',false)" ${busy?'disabled':''}>← Move back to Available</button>`
           : `<button class="card-btn sell" onclick="moveMachine('${key}',true)" ${busy?'disabled':''}>Mark as Sold → Portfolio</button>`
         }
@@ -428,17 +444,20 @@ function esc(s) {
 function render() {
   const machines = getMachines();
   const keys = Object.keys(machines);
-  let availHTML = '', portHTML = '';
-  let availCount = 0, portCount = 0;
+  let availHTML = '', portHTML = '', draftHTML = '';
+  let availCount = 0, portCount = 0, draftCount = 0;
   for (const k of keys) {
     const m = machines[k];
-    if (m.sold === true) { portHTML += renderCard(k, m, true); portCount++; }
+    if (m.draft === true) { draftHTML += renderCard(k, m, false, true); draftCount++; }
+    else if (m.sold === true) { portHTML += renderCard(k, m, true); portCount++; }
     else { availHTML += renderCard(k, m, false); availCount++; }
   }
   document.getElementById('available-list').innerHTML = availHTML || '<div class="empty-state">No available machines</div>';
   document.getElementById('portfolio-list').innerHTML = portHTML || '<div class="empty-state">No sold machines yet</div>';
+  document.getElementById('draft-list').innerHTML = draftHTML || '<div class="empty-state">No unpublished drafts</div>';
   document.getElementById('available-count').textContent = availCount;
   document.getElementById('portfolio-count').textContent = portCount;
+  document.getElementById('draft-count').textContent = draftCount;
   setupDropzones();
 }
 
@@ -565,6 +584,27 @@ async function deleteMachine(key) {
   } finally { setLoading(false); }
 }
 
+async function publishMachine(key) {
+  if (busy) return;
+  setLoading(true);
+  try {
+    await fetchConfig(getPAT());
+    const machine = config.images.machines[key];
+    if (!machine) throw new Error(`Machine ${key} not found`);
+    if (machine.draft !== true) {
+      showToast(`${machine.title || key} is already published`);
+      return;
+    }
+    delete machine.draft;
+    await saveConfig(`admin: publish ${key}`);
+    await fetchConfig(getPAT());
+    render();
+    showToast(`Published "${machine.title || key}"`);
+  } catch (e) {
+    showToast('Publish failed: ' + e.message, 'error');
+  } finally { setLoading(false); }
+}
+
 /* ── Add Form ── */
 function toggleAddForm() {
   const toggle = document.getElementById('add-toggle');
@@ -606,7 +646,9 @@ async function handleAddMachine() {
       if (name && val) specs[name] = val;
     }
 
+    const description = document.getElementById('f-description').value.trim();
     machines[key] = { tag, title, price, specs };
+    if (description) machines[key].description = description;
     if (document.getElementById('f-sold').checked) machines[key].sold = true;
     await saveConfig(`admin: add ${key} — ${title}`);
     await fetchConfig(getPAT());
@@ -617,6 +659,7 @@ async function handleAddMachine() {
     for (const id of ['f-title','f-tag','f-price','f-cpu','f-gpu','f-ram','f-storage','f-mobo','f-cooling','f-case','f-psu','f-os']) {
       document.getElementById(id).value = '';
     }
+    document.getElementById('f-description').value = '';
     document.getElementById('f-extra').value = '';
     document.getElementById('f-sold').checked = false;
   } catch (e) {

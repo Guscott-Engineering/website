@@ -21,6 +21,11 @@
 <!-- Components rebuilt from the design system + page layout -->
 <link rel="stylesheet" href="styles/components.css">
 <link rel="stylesheet" href="styles/site.css">
+<style>
+  .ge-modal-overview{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(220px,1fr);gap:20px;align-items:start;margin-bottom:24px}
+  .ge-modal-description{color:var(--ink-200);font-size:15px;line-height:1.7;margin:0}
+  @media(max-width:640px){.ge-modal-overview{grid-template-columns:1fr}}
+</style>
 
 <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
@@ -219,10 +224,15 @@
     <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt-400);margin-bottom:8px;">Specs</div>
     <h3 id="ge-modal-title" style="font-family:var(--font-display);font-weight:700;font-size:22px;color:#fff;margin:0 0 6px;"></h3>
     <p id="ge-modal-price" style="font-size:20px;font-weight:700;color:var(--volt-400);margin:0 0 24px;font-family:var(--font-mono);"></p>
-    <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:12px;">
-      <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
+    <div class="ge-modal-overview">
+      <div>
+        <div id="ge-modal-img-wrap" style="width:100%;aspect-ratio:16/9;background:var(--ink-1000);border-radius:8px;overflow:hidden;margin-bottom:12px;">
+          <img id="ge-modal-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
+        </div>
+        <div id="ge-modal-thumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;"></div>
+      </div>
+      <p id="ge-modal-description" class="ge-modal-description"></p>
     </div>
-    <div id="ge-modal-thumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:24px;"></div>
     <div id="ge-modal-specs" class="ge-spec-list"></div>
     <div style="margin-top:28px;text-align:center;">
       <a class="ge-btn ge-btn--primary" href="mailto:Guscottengineering@gmail.com" id="ge-modal-cta">Email Ayden about this build</a>
@@ -393,7 +403,7 @@ async function loadMachines(config) {
     container.innerHTML = '';
     const machines = machineEntries
       .map(([id, m]) => ({ id, ...m }))
-      .filter(machine => !machine.sold);
+      .filter(machine => !machine.sold && !machine.draft);
     if (machines.length === 0) {
       if (availSection) availSection.style.display = 'none';
       return;
@@ -418,7 +428,7 @@ async function loadMachines(config) {
 
       // Store specs and full images array for the modal
       _machineIdByToken[machineToken] = machineId;
-      _machineSpecs[machineId] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
+      _machineSpecs[machineId] = { title: machine.title, price: machine.price, description: machine.description || '', specs: machine.specs || null, images };
 
       const thumbsHtml = images.map((img, idx) => `
         <button class="ge-thumb-btn" data-machine-token="${machineToken}" data-idx="${idx}"
@@ -587,7 +597,7 @@ async function loadSoldBuilds(config) {
 
     const machines = machineEntries
       .map(([id, m]) => ({ id, ...m }))
-      .filter(m => m.sold);
+      .filter(m => m.sold && !m.draft);
 
     if (machines.length === 0) return;
 
@@ -598,7 +608,7 @@ async function loadSoldBuilds(config) {
       const images = await fetchCloudinaryImages(config.cloudName, machine.tag);
       if (images.length === 0) continue;
       _machineIdByToken[machineToken] = machineId;
-      _machineSpecs[machineId] = { title: machine.title, price: machine.price, specs: machine.specs || null, images };
+      _machineSpecs[machineId] = { title: machine.title, price: machine.price, description: machine.description || '', specs: machine.specs || null, images };
       decks.push({ machine, images });
     }
 
@@ -888,7 +898,10 @@ function openMachineModal(machineId) {
   const data = _machineSpecs[machineId];
   if (!data) return;
   document.getElementById('ge-modal-title').textContent = data.title;
-  document.getElementById('ge-modal-price').textContent = data.price;
+  document.getElementById('ge-modal-price').textContent = data.price || 'Contact for price';
+  const description = document.getElementById('ge-modal-description');
+  description.textContent = data.description || '';
+  description.style.display = data.description ? '' : 'none';
   const modalImg = document.getElementById('ge-modal-img');
   setImageHints(modalImg, { loading: 'eager', fetchPriority: 'high' });
   const imgWrap = document.getElementById('ge-modal-img-wrap');
