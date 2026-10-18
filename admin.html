@@ -118,9 +118,9 @@
   .form-group{display:flex;flex-direction:column;gap:5px}
   .form-group.full{grid-column:1/-1}
   .form-group label{font-family:var(--mono);font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-  .form-group input{padding:11px 14px;background:var(--bg);border:1px solid var(--border);
+  .form-group input,.form-group textarea{font-family:inherit;padding:11px 14px;background:var(--bg);border:1px solid var(--border);
     border-radius:8px;color:var(--text);font-size:.86rem;outline:none;transition:border .2s}
-  .form-group input:focus{border-color:var(--volt)}
+  .form-group input:focus,.form-group textarea:focus{border-color:var(--volt)}
   .form-group input::placeholder{color:var(--text3)}
   .add-submit{grid-column:1/-1;padding:14px;background:var(--volt);color:var(--bg);border:none;
     border-radius:var(--radius);font-family:var(--mono);font-size:.9rem;font-weight:700;
@@ -241,6 +241,8 @@
         <div class="form-group"><label>Case</label><input id="f-case" placeholder="Mid-Tower ATX"></div>
         <div class="form-group"><label>PSU</label><input id="f-psu" placeholder="750W 80+ Gold"></div>
         <div class="form-group"><label>OS</label><input id="f-os" placeholder="Windows 11 Pro"></div>
+        <div class="form-group"><label>Extra specs (one per line, "Name: value")</label><textarea id="f-extra" rows="3" placeholder="Wi-Fi: Wi-Fi 6E&#10;Warranty: 30 days"></textarea></div>
+        <div class="form-group"><label style="flex-direction:row;display:flex;gap:8px;align-items:center"><input type="checkbox" id="f-sold" style="width:auto"> Already sold (goes to Sold Builds)</label></div>
         <button class="add-submit" id="add-btn" onclick="handleAddMachine()">+ Add Machine</button>
       </div>
     </div>
@@ -597,7 +599,15 @@ async function handleAddMachine() {
       if (v) specs[name] = v;
     }
 
+    for (const line of document.getElementById('f-extra').value.split('\n')) {
+      const i = line.indexOf(':');
+      if (i < 1) continue;
+      const name = line.slice(0, i).trim(), val = line.slice(i + 1).trim();
+      if (name && val) specs[name] = val;
+    }
+
     machines[key] = { tag, title, price, specs };
+    if (document.getElementById('f-sold').checked) machines[key].sold = true;
     await saveConfig(`admin: add ${key} — ${title}`);
     await fetchConfig(getPAT());
     render();
@@ -607,6 +617,8 @@ async function handleAddMachine() {
     for (const id of ['f-title','f-tag','f-price','f-cpu','f-gpu','f-ram','f-storage','f-mobo','f-cooling','f-case','f-psu','f-os']) {
       document.getElementById(id).value = '';
     }
+    document.getElementById('f-extra').value = '';
+    document.getElementById('f-sold').checked = false;
   } catch (e) {
     showToast('Add failed: ' + e.message, 'error');
   } finally { setLoading(false); }
