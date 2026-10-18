@@ -101,7 +101,6 @@
         "tag": "PC6",
         "title": "White Mid-Range Gaming PC",
         "price": "$800",
-        "draft": true,
         "description": "A sleek all-white gaming PC, fully assembled and stress-tested for high-FPS 1080p and 1440p gaming, streaming, content creation, and everyday productivity.",
         "specs": {
           "CPU": "AMD Ryzen 5 5500 (6 Cores / 12 Threads, up to 4.2 GHz Boost)",
@@ -116,7 +115,6 @@
         "tag": "PC7",
         "title": "Low-Profile Mid-Range Gaming PC",
         "price": "$1200",
-        "draft": true,
         "description": "A low-profile, fully tested and cleaned gaming PC built for high-FPS 1080p and 1440p gaming, streaming, content creation, and multitasking.",
         "specs": {
           "CPU": "AMD Ryzen 7 5800XT (8 Cores / 16 Threads, up to 4.8 GHz Boost)",
@@ -131,7 +129,6 @@
         "tag": "PC8",
         "title": "Starter Gaming & School PC",
         "price": "$400",
-        "draft": true,
         "description": "A cleaned, tested, ready-to-use desktop for school, office work, everyday tasks, and entry-level esports gaming.",
         "specs": {
           "CPU": "Intel Core i5-6500 (3.20 GHz)",
