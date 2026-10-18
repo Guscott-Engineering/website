@@ -354,11 +354,11 @@ async function loadPortfolio(config) {
     const arrowStyle = 'position:absolute;top:50%;transform:translateY(-50%);background:rgba(10,10,10,.7);border:1px solid rgba(255,255,255,.14);color:#fff;width:42px;height:42px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:background .2s,transform .15s;';
 
     carousel.innerHTML = `
-      <div style="position:relative;user-select:none;">
+      <div style="position:relative;user-select:none;max-width:560px;margin:0 auto;">
         <div class="ge-portfolio-stage">${slidesHtml}</div>
         ${images.length > 1 ? `
-          <button class="ge-port-prev" aria-label="Previous" style="${arrowStyle}left:-18px;">&#8249;</button>
-          <button class="ge-port-next" aria-label="Next"     style="${arrowStyle}right:-18px;">&#8250;</button>
+          <button class="ge-port-prev" aria-label="Previous" style="${arrowStyle}left:-8px;">&#8249;</button>
+          <button class="ge-port-next" aria-label="Next"     style="${arrowStyle}right:-8px;">&#8250;</button>
         ` : ''}
       </div>
       ${images.length > 1 ? `<div style="display:flex;justify-content:center;gap:8px;margin-top:16px;">${dotsHtml}</div>` : ''}
