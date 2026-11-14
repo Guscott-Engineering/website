@@ -237,3 +237,20 @@ img{max-width:100%;}
   font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;
   text-transform:uppercase;color:var(--ink-400);max-width:90%;line-height:1.5;
 }
+
+/* ---- Responsiveness / snappiness ---- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;}
+body{overflow-x:hidden;}
+img{max-width:100%;height:auto;}
+a,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+input,select,textarea{font-size:16px;}
+.ge-portfolio-slide img,.ge-cloudinary-image{content-visibility:auto;}
+section{content-visibility:auto;contain-intrinsic-size:auto 600px;}
+@media(max-width:600px){
+  section>div[style*="padding:88px"],section>div[style*="padding:72px"]{padding-top:48px !important;padding-bottom:48px !important;}
+  .ge-header>div{padding:12px 16px !important;}
+  .ge-port-prev{left:4px !important;}
+  .ge-port-next{right:4px !important;}
+  .ge-btn{min-height:40px;}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
